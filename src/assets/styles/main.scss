@@ -11,10 +11,11 @@
 
 html {
   overflow: hidden !important;
+  font-size: 14px;
 }
 
 .main-layout {
-  padding: 0em;
+  padding: 0rem;
 
   height: 100%;
   overflow: auto !important;
@@ -32,11 +33,11 @@ html {
   overflow: hidden !important;
   display: flex;
 
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
-  height: 1.8em;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  height: 1.8rem;
 }
 
 .title-label {
@@ -47,7 +48,7 @@ html {
 .maximize-window,
 .close-window {
   -webkit-app-region: no-drag;
-  margin-left: 0.875em;
+  margin-left: 0.875rem;
 }
 
 
@@ -58,24 +59,55 @@ html {
 
 .header {
   background-color: none;
-  border-radius: 0.5em;
+  border-radius: 0.5rem;
 
-  padding: 0em;
-  margin: 0.25em 1.3em;
-  font-size: 1.5em;
+  padding: 0rem;
+  margin: 0.25rem 2rem;
+  font-size: 1.75rem;
 }
 
 .panel {
   background-color: var(--v-panel_background-base);
 
-  border-radius: 0.5em;
-  padding: 1em;
-  margin: 0em 1em;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0rem 1rem;
 
   /* Set the different style for elements that are not the first of this class */
   &~& {
-    margin: 1em;
+    margin: 1rem;
   }
 
-  .panel-header {}
+  .panel-header {
+    background-color: none;
+    border-radius: 0.5rem;
+
+    padding: 0rem;
+    margin: 0rem;
+    font-size: 1.25rem;
+  }
+}
+
+.v-btn.square {
+  padding: 0rem !important;
+
+  &.v-size--small {
+    height: 2rem !important;
+    min-width: 2rem !important;
+  }
+
+  &.v-size--default {
+    height: 2.57rem !important;
+    min-width: 2.57rem !important;
+  }
+
+  &.v-size--large {
+    height: 3.14rem !important;
+    min-width: 3.14rem !important;
+  }
+
+  &.v-size--x-large {
+    height: 3.71rem !important;
+    min-width: 3.71rem !important;
+  }
 }
