@@ -1,6 +1,8 @@
 bin/
 release/
 
+package-lock.json
+
 .DS_Store
 /dist
 
@@ -121,6 +123,6 @@ dist
 *.njsproj
 *.sln
 *.sw?
+
 #Electron-builder output
 /dist_electron
-package-lock.json
