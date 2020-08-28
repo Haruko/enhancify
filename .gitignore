@@ -1,3 +1,9 @@
+bin/
+release/
+
+.DS_Store
+/dist
+
 # Logs
 logs
 *.log
@@ -102,3 +108,18 @@ dist
 
 # TernJS port file
 .tern-port
+
+# local env files
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+#Electron-builder output
+/dist_electron
