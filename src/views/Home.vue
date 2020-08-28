@@ -1,59 +1,22 @@
 <template>
   <div class="home">
-    <div class="header">
-      Header
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        Header
+    <div>
+      <div class="header">
+        Config
       </div>
-      <VSwitch v-model="enabled" :label="enabled ? 'On' : 'Off'"></VSwitch>
-      <VBtn class="square" small :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-      <VBtn small :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
+      <div class="panel">
+        <VSlider dense v-model="crossfade" label="Crossfade" hint="Match this to the setting in Spotify" persistent-hint min="0" max="12" ticks thumb-label="always" thumb-size=0></VSlider>
+        <VSwitch v-model="bookmarkPlaylist" label="Save bookmarks to Spotify playlist" readonly></VSwitch>
+      </div>
     </div>
-    <div class="panel">
-      <VSwitch v-model="enabled" :label="enabled ? 'On' : 'Off'"></VSwitch>
-      <VBtn class="square" medium :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-      <VBtn medium :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-    </div>
-    <div class="panel">
-      <VSwitch v-model="enabled" :label="enabled ? 'On' : 'Off'"></VSwitch>
-      <VBtn class="square" large :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-      <VBtn large :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-    </div>
-    <div class="panel">
-      <VSwitch v-model="enabled" :label="enabled ? 'On' : 'Off'"></VSwitch>
-      <VBtn class="square" x-large :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-      <VBtn x-large :color="enabled ? 'primary' : 'secondary'" @click.native="enabled = !enabled"></VBtn>
-    </div>
-    <div class="panel">
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />x
-      <p />
-      <VBtn large color="accent">Accent</VBtn>
+    <div>
+      <div class="header">
+        Now Playing
+      </div>
+      <div class="panel">
+        <VBtn color="primary" @click.native="/*open dir*/">Open file directory</VBtn>
+        <VBtn color="primary" @click.native="/*add new file formatting thing*/">Open file directory</VBtn>
+      </div>
     </div>
   </div>
 </template>
@@ -62,7 +25,8 @@ export default {
   name: 'Home',
 
   data: () => ({
-    enabled: true,
+    crossfade: 0,
+    bookmarkPlaylist: false,
   }),
 }
 </script>
