@@ -1,0 +1,81 @@
+/**/
+/* Main */
+/**/
+
+#app {
+  background-color: var(--v-background-base);
+
+  color: var(--v-text-base);
+  user-select: none;
+}
+
+html {
+  overflow: hidden !important;
+}
+
+.main-layout {
+  padding: 0em;
+
+  height: 100%;
+  overflow: auto !important;
+}
+
+
+
+/**/
+/* Title Bar */
+/**/
+
+.title-bar {
+  background-color: var(--v-primary-base);
+  -webkit-app-region: drag;
+  overflow: hidden !important;
+  display: flex;
+
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  height: 1.8em;
+}
+
+.title-label {
+  flex: 1;
+}
+
+.minimize-window,
+.maximize-window,
+.close-window {
+  -webkit-app-region: no-drag;
+  margin-left: 0.875em;
+}
+
+
+
+/**/
+/* Content */
+/**/
+
+.header {
+  background-color: none;
+  border-radius: 0.5em;
+
+  padding: 0em;
+  margin: 0.25em 1.3em;
+  font-size: 1.5em;
+}
+
+.panel {
+  background-color: var(--v-panel_background-base);
+
+  border-radius: 0.5em;
+  padding: 1em;
+  margin: 0em 1em;
+
+  /* Set the different style for elements that are not the first of this class */
+  &~& {
+    margin: 1em;
+  }
+
+  .panel-header {}
+}

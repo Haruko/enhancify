@@ -1,18 +1,58 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="header">
+      Section header
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        Section header
+      </div>
+      <VSwitch v-model="enabled" :label="enabled ? 'On' : 'Off'"></VSwitch>
+      <VBtn large color="primary" @click.native="enabled = true">On</VBtn>
+      <p />
+      <VBtn large color="secondary" @click.native="enabled = false">Off</VBtn>
+    </div>
+    <div class="panel">
+      <VSwitch v-model="enabled" :label="enabled ? 'On' : 'Off'"></VSwitch>
+      <VBtn large color="primary" @click.native="enabled = true">On</VBtn>
+      <p />
+      <VBtn large color="secondary" @click.native="enabled = false">Off</VBtn>
+    </div>
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />x
+    <p />
+    <VBtn large color="accent">Accent</VBtn>
   </div>
 </template>
-
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
 export default {
   name: 'Home',
-  components: {
-    HelloWorld
-  }
+
+  data: () => ({
+    enabled: true,
+  }),
 }
 </script>
