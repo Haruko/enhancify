@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="authorized">
     <div>
       <div class="header">
         Config

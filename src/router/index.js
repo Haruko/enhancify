@@ -1,13 +1,18 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Unauthorized from '../views/Unauthorized.vue'
+import Authorized from '../views/Authorized.vue'
 
 Vue.use(VueRouter)
 
 const routes = [{
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'Unauthorized',
+    component: Unauthorized
+  }, {
+    path: '/authorized',
+    name: 'Authorized',
+    component: Authorized
   },
   // {
   // path: '/about',

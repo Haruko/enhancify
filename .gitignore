@@ -126,3 +126,4 @@ dist
 
 #Electron-builder output
 /dist_electron
+public/config/config.json

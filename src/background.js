@@ -43,7 +43,6 @@ function createWindow() {
   }
 
   win.once('ready-to-show', () => {
-    console.log('read to show')
     win.webContents.send('window-resize', width, height);
     win.show();
   });
