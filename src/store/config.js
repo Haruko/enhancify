@@ -6,7 +6,9 @@ import fs from 'electron-fs-extra';
 
 export default {
   state: {
-    config: {
+    configData: {
+      client_id: '925a4155c7ea4913a35fc79f5eec4828',
+      
       outputDir: ['[{CURRENT_DIR}]', 'output'],
 
       formatStrings: [{
@@ -26,8 +28,11 @@ export default {
   },
 
   mutations: {
-    SET_CONFIG(state, config) {
-      state.config = config;
+    SET_CONFIG(state, configData) {
+      Object.keys(state.configData)
+        .forEach(key => {
+          state.configData[key] = configData[key];
+        });
     },
 
     SET_CONFIG_PATH(state, configPath) {
@@ -40,14 +45,16 @@ export default {
       let newPath;
 
       if (typeof configPath === 'undefined') {
+        // If not supplied a path, get a default one
         const isBuild = process.env.NODE_ENV === 'production'
         newPath = path.join(
           (isBuild ? __dirname : __static),
           (isBuild ? '../../' : ''),
-          'config',
+          // 'config',
           'config.json'
         );
       } else {
+        // If supplied a path, use that one
         newPath = configPath;
       }
       
@@ -71,12 +78,12 @@ export default {
           config = json5.parse(configText);
         } catch (error) {
           // In case of malformed config, load default
-          config = state.config;
+          config = state.configData;
         }
       } else {
         // If it does not exist, load the default config defined above
         await fs.ensureFile(state.configPath);
-        config = state.config;
+        config = state.configData;
       }
 
       // Save config in state
@@ -86,7 +93,7 @@ export default {
 
     async saveConfig({ state }) {
       console.log(state.configPath);
-      await fs.writeFile(state.configPath, json5.stringify(state.config), { flag: 'w' });
+      await fs.writeFile(state.configPath, json5.stringify(state.configData), { flag: 'w' });
     },
   },
 };
