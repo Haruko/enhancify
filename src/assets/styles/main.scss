@@ -71,11 +71,11 @@ html {
 
   border-radius: 0.5rem;
   padding: 1rem;
-  margin: 0rem 1rem;
+  margin: 1rem;
 
-  /* Set the different style for elements that are not the first of this class */
-  &~& {
-    margin: 1rem;
+  /* Set the different style for panels that are after a header */
+  .header~& {
+    margin: 0rem 1rem;
   }
 
   .panel-header {
