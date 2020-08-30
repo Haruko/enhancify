@@ -3,22 +3,23 @@ const axios = require('axios');
 const qs = require('querystring');
 
 import { ipcRenderer } from 'electron';
+import router from '../router'
 
 export default {
   state: {
+    port: 8080,
+    scope: 'user-read-playback-state',
+
+    state: pkce.createChallenge(),
+    codePair: pkce.create(),
+
     access_token: undefined,
     token_type: undefined,
     expires_in: undefined,
 
     refresh_token: undefined,
-
-    port: 8080,
-    scope: 'user-read-playback-state',
-
-    // state: undefined,
-    // codePair: undefined,
-    state: pkce.createChallenge(),
-    codePair: pkce.create(),
+    refreshTokenTimeoutID: undefined,
+    refreshFailCount: 0,
   },
 
   mutations: {
@@ -34,16 +35,24 @@ export default {
       state.access_token = token;
     },
 
-    SET_REFRESH_TOKEN(state, token) {
-      state.refresh_token = token;
-    },
-
     SET_TOKEN_TYPE(state, token) {
       state.token_type = token;
     },
 
     SET_EXPIRES_IN(state, token) {
       state.expires_in = token;
+    },
+
+    SET_REFRESH_TOKEN(state, token) {
+      state.refresh_token = token;
+    },
+
+    SET_REFRESH_TOKEN_TIMEOUT_ID(state, id) {
+      state.refreshTokenTimeoutID = id;
+    },
+
+    SET_REFRESH_FAIL_COUNT(state, count) {
+      state.refreshFailCount = count;
     },
   },
 
@@ -74,6 +83,8 @@ export default {
       localStorage.removeItem('codeVerifier');
     },
 
+    // Request new access token from Spotify
+    // Handles both authorization and refresh token payloads
     async requestAccessToken({ state, rootState, getters, commit, dispatch }, authCode) {
       let reqData;
 
@@ -107,15 +118,53 @@ export default {
         commit('SET_EXPIRES_IN', expires_in);
         commit('SET_REFRESH_TOKEN', refresh_token);
 
+        await dispatch('setupRefreshTokenTimeout');
+
         await dispatch('storeRefreshToken');
 
+        // return true;
         return true;
       } else {
         // No success
+
+        commit('SET_ACCESS_TOKEN', undefined);
+        commit('SET_TOKEN_TYPE', undefined);
+        commit('SET_EXPIRES_IN', undefined);
+        commit('SET_REFRESH_TOKEN', undefined);
+        
         return false;
       }
     },
 
+    // Setup the timer for requesting a new refresh token
+    setupRefreshTokenTimeout({ state, commit, dispatch }) {
+      clearTimeout(state.refreshTokenTimeoutID);
+
+      let timeoutLength = state.expires_in ? (state.expires_in - 10) * 1000 : 2000;
+      if (state.refreshFailCount > 0) {
+        timeoutLength = 2 * 1000;
+      }
+
+      const refreshTokenTimeoutID = setTimeout(async () => {
+        const success = await dispatch('requestAccessToken');
+
+        if (success) {
+          commit('SET_REFRESH_FAIL_COUNT', 0);
+          await dispatch('setupRefreshTokenTimeout');
+        } else {
+          commit('SET_REFRESH_FAIL_COUNT', state.refreshFailCount + 1);
+          await dispatch('setupRefreshTokenTimeout');
+          if (state.refreshFailCount === 5) {
+            await dispatch('deAuth');
+            router.push('/');
+          }
+        }
+      }, timeoutLength);
+
+      commit('SET_REFRESH_TOKEN_TIMEOUT_ID', refreshTokenTimeoutID);
+    },
+
+    // Load refresh token from file
     async loadRefreshToken({ commit }) {
       let token = await ipcRenderer.invoke('read-file', 'token', 'refresh.token');
 
@@ -127,8 +176,24 @@ export default {
       }
     },
 
+    // Store refresh token in file
     async storeRefreshToken({ state }) {
       await ipcRenderer.invoke('write-file', 'token', 'refresh.token', state.refresh_token);
+    },
+
+    // Force removal of auth
+    async deAuth({ state, commit }) {
+      clearTimeout(state.refreshTokenTimeoutID);
+      commit('SET_CODE_STATE', pkce.createChallenge());
+      commit('SET_CODE_PAIR', pkce.create());
+      commit('SET_ACCESS_TOKEN', undefined);
+      commit('SET_REFRESH_TOKEN', undefined);
+      commit('SET_TOKEN_TYPE', undefined);
+      commit('SET_EXPIRES_IN', undefined);
+      commit('SET_REFRESH_TOKEN_TIMEOUT_ID', undefined);
+      commit('SET_REFRESH_FAIL_COUNT', 0);
+
+      await ipcRenderer.invoke('delete-file', 'token', 'refresh.token');
     },
   },
 

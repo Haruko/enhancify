@@ -88,26 +88,30 @@ html {
   }
 }
 
-.v-btn.square {
-  padding: 0rem !important;
+.v-btn {
+  margin: 0.25rem;
 
-  &.v-size--small {
-    height: 2rem !important;
-    min-width: 2rem !important;
-  }
+  &.square {
+    padding: 0rem !important;
 
-  &.v-size--default {
-    height: 2.57rem !important;
-    min-width: 2.57rem !important;
-  }
+    &.v-size--small {
+      height: 2rem !important;
+      min-width: 2rem !important;
+    }
 
-  &.v-size--large {
-    height: 3.14rem !important;
-    min-width: 3.14rem !important;
-  }
+    &.v-size--default {
+      height: 2.57rem !important;
+      min-width: 2.57rem !important;
+    }
 
-  &.v-size--x-large {
-    height: 3.71rem !important;
-    min-width: 3.71rem !important;
+    &.v-size--large {
+      height: 3.14rem !important;
+      min-width: 3.14rem !important;
+    }
+
+    &.v-size--x-large {
+      height: 3.71rem !important;
+      min-width: 3.71rem !important;
+    }
   }
 }

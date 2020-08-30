@@ -25,6 +25,7 @@ export function initIPC(win) {
   // Read file and send data back to renderer
   ipcMain.handle('read-file', async (event, type, filePath) => {
     const newPath = path.join(getFileBasePath(type), filePath);
+    console.log('read', newPath);
 
     const exists = await fs.pathExists(newPath);
     if (exists) {
@@ -37,10 +38,18 @@ export function initIPC(win) {
   // Write file
   ipcMain.handle('write-file', async (event, type, filePath, data) => {
     const newPath = path.join(getFileBasePath(type), filePath);
-    console.log(newPath)
-    await fs.ensureFile(newPath);
+    console.log('write', newPath);
 
+    await fs.ensureFile(newPath);
     await fs.writeFile(newPath, data, { flag: 'w' });
+  });
+
+  // Delete file
+  ipcMain.handle('delete-file', async (event, type, filePath) => {
+    const newPath = path.join(getFileBasePath(type), filePath);
+    console.log('delete', newPath);
+
+    await fs.remove(newPath);
   });
 };
 
