@@ -6,25 +6,21 @@
     <div class="panel text-center">
       Need to authorize with Spotify!
       <p />
-      <VBtn color="primary" @click.native="openSpotifyAuth()">Authorize</VBtn>
+      <VBtn color="primary" @click.native="authorize()">Authorize</VBtn>
     </div>
   </div>
 </template>
 <script>
 export default {
   name: 'Unauthorized',
-
-  data: () => ({
-    testData: 'test',
-  }),
-
-  created() {
-    
-  },
-
+  
   methods: {
-    openSpotifyAuth() {
-
+    authorize() {
+      // :href="$store.getters.authUri"
+      this.$store.dispatch('saveToLocalStorage')
+        .then(() => {
+          location.replace(this.$store.getters.authUri);
+        });
     },
   },
 }

@@ -8,8 +8,7 @@ import '@/assets/styles/main.scss'
 
 Vue.config.productionTip = false
 
-store.dispatch('setConfigPath')
-  .then(() => store.dispatch('loadConfig'))
+store.dispatch('loadConfig')
   .then(() => {
     new Vue({
       router,

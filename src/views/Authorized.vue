@@ -22,7 +22,7 @@
 </template>
 <script>
 export default {
-  name: 'Home',
+  name: 'Authorized',
 
   data: () => ({
     crossfade: 0,
