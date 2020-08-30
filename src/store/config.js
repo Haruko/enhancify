@@ -8,8 +8,6 @@ export default {
   state: {
     configData: {
       client_id: '925a4155c7ea4913a35fc79f5eec4828',
-      
-      outputDir: ['[{CURRENT_DIR}]', 'output'],
 
       formatStrings: [{
         filename: 'trackinfo.txt',
@@ -23,8 +21,6 @@ export default {
 
       hotkey: [54, 61010],
     },
-
-    configPath: undefined,
   },
 
   mutations: {
@@ -34,44 +30,18 @@ export default {
           state.configData[key] = configData[key];
         });
     },
-
-    SET_CONFIG_PATH(state, configPath) {
-      state.configPath = configPath;
-    },
   },
 
   actions: {
-    async setConfigPath({ commit }, configPath) {
-      let newPath;
-
-      if (typeof configPath === 'undefined') {
-        // If not supplied a path, get a default one
-        const isBuild = process.env.NODE_ENV === 'production'
-        newPath = path.join(
-          (isBuild ? __dirname : __static),
-          (isBuild ? '../../' : ''),
-          // 'config',
-          'config.json'
-        );
-      } else {
-        // If supplied a path, use that one
-        newPath = configPath;
-      }
-      
-      console.log('newPath', newPath)
-
-      commit('SET_CONFIG_PATH', newPath);
-    },
-
-    async loadConfig({ state, commit, dispatch }) {
+    async loadConfig({ state, commit, dispatch, getters }) {
       // Check if the config file exists
-      const configExist = await fs.pathExists(state.configPath);
+      const configExist = await fs.pathExists(getters.configPath);
 
       let config;
 
       if (configExist) {
         // If it exists, load the config
-        const configText = await fs.readFile(state.configPath)
+        const configText = await fs.readFile(getters.configPath)
 
         try {
           // Try to load the config
@@ -82,7 +52,7 @@ export default {
         }
       } else {
         // If it does not exist, load the default config defined above
-        await fs.ensureFile(state.configPath);
+        await fs.ensureFile(getters.configPath);
         config = state.configData;
       }
 
@@ -91,9 +61,33 @@ export default {
       await dispatch('saveConfig', config);
     },
 
-    async saveConfig({ state }) {
-      console.log(state.configPath);
-      await fs.writeFile(state.configPath, json5.stringify(state.configData), { flag: 'w' });
+    async saveConfig({ getters }) {
+      await fs.writeFile(getters.configPath, json5.stringify(getters.configData), { flag: 'w' });
+    },
+  },
+
+  getters: {
+    configPath() {
+      const isBuild = process.env.NODE_ENV === 'production'
+      const filePath = path.join(
+        (isBuild ? __dirname : __static),
+        (isBuild ? '../../' : ''),
+        // 'config',
+        'config.json'
+      );
+
+      return filePath;
+    },
+
+    outputPath() {
+      const isBuild = process.env.NODE_ENV === 'production'
+      const dirPath = path.join(
+        (isBuild ? __dirname : __static),
+        (isBuild ? '../../' : ''),
+        'output'
+      );
+
+      return dirPath;
     },
   },
 };
