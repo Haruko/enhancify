@@ -18,10 +18,10 @@ const routes = [{
       // Check for refresh token file
       .then(() => store.dispatch('loadRefreshToken'))
       .then((existed) => {
-        console.log(existed);
         if (existed) {
           return store.dispatch('requestAccessToken')
-            .then(() => next('/authorized'));
+            .then(() => next('/authorized'))
+            .catch(() => next());
         } else {
           next();
         }
@@ -44,7 +44,7 @@ const routes = [{
         } else {
           store.dispatch('requestAccessToken', authCode)
             .then(() => next('/authorized'))
-            .catch(() => next('/unauthorized'));
+            .catch(() => next('/'));
         }
       });
   },
