@@ -74,15 +74,21 @@ html {
   .panel-header {
     background-color: none;
     border-radius: 0.5rem;
+    
+    padding-left: 1rem;
 
     font-size: 1.25rem;
+  }
+  
+  .panel {
+    background-color: var(--v-panel_background-lighten1);
   }
 }
 
 .v-btn {
   margin: 0.25rem;
 
-  /*&.square {
+  &.square {
     padding: 0rem !important;
 
     &.v-size--small {
@@ -104,7 +110,7 @@ html {
       height: 3.71rem !important;
       min-width: 3.71rem !important;
     }
-  }*/
+  }
 }
 
 .v-label {

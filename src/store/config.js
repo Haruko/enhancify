@@ -1,6 +1,7 @@
 const json5 = require('json5');
 
 import { ipcRenderer } from 'electron';
+import Vue from 'vue'
 
 export default {
   state: {
@@ -8,12 +9,12 @@ export default {
     client_id: '925a4155c7ea4913a35fc79f5eec4828',
 
     // Editable by user in frontend
-    formatStrings: [{
+    fileFormats: [{
       filename: 'trackinfo.txt',
-      formatString: '[{ARTIST}] - [{TITLE}]',
+      format: '[{ARTIST}] - [{TITLE}]',
     }, {
       filename: 'progress.txt',
-      formatString: '[{PROGRESS}] / [{LENGTH}]',
+      format: '[{PROGRESS}] / [{LENGTH}]',
     }],
 
     // Editable by user in frontend
@@ -37,6 +38,21 @@ export default {
 
     SET_CONFIG_PROP(state, { prop, value }) {
       state[prop] = value;
+    },
+
+    ADD_FILE_FORMAT(state) {
+      state.fileFormats.push({ filename: '', format: '' });
+    },
+
+    UPDATE_FILE_FORMAT(state, { format, index }) {
+      Vue.set(state.fileFormats, index, format);
+      // state.fileFormats[index] = format;
+    },
+
+    DELETE_FILE_FORMAT(state, index) {
+      if (index >= 0 && index < state.fileFormats.length) {
+        state.fileFormats.splice(index, 1);
+      }
     },
   },
 
@@ -66,10 +82,32 @@ export default {
     },
 
     async changeConfigProp({ commit, dispatch }, { prop, value }) {
-      console.log('changeConfigProp', prop, value)
       commit('SET_CONFIG_PROP', { prop, value });
 
       await dispatch('storeConfig');
-    }
+    },
+
+    // File formats
+    async addFileFormat({ state, commit, dispatch }) {
+      const emptyExists = state.fileFormats.filter((format) => format.filename === '' && format.format === '').length > 0;
+
+      if (!emptyExists) {
+        commit('ADD_FILE_FORMAT');
+      }
+
+      await dispatch('storeConfig');
+    },
+    
+    async updateFileFormat({ commit, dispatch }, { format, index }) {
+      commit('UPDATE_FILE_FORMAT', { format, index });
+
+      await dispatch('storeConfig');
+    },
+
+    async removeFileFormat({ commit, dispatch }, index) {
+      commit('DELETE_FILE_FORMAT', index);
+
+      await dispatch('storeConfig');
+    },
   },
 };

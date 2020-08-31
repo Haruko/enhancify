@@ -6,8 +6,8 @@
   </VApp>
 </template>
 <script>
-import MainLayout from './layouts/MainLayout.vue';
-import TitleBar from './components/TitleBar.vue';
+import MainLayout from '@/layouts/MainLayout.vue';
+import TitleBar from '@/components/TitleBar.vue';
 
 import { ipcRenderer } from 'electron';
 

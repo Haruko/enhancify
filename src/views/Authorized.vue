@@ -17,7 +17,7 @@
             <VSwitch v-model="saveBookmarksLocal" label="Save bookmarks to local file"></VSwitch>
           </VCol>
           <VCol>
-            <VBtn color="primary" @click.native="/*open file*/">Open bookmarks file</VBtn>
+            <VBtn disabled color="primary" @click.native="/*open file*/">Open bookmarks file</VBtn>
           </VCol>
         </VRow>
         <VRow no-gutters align="center">
@@ -25,7 +25,7 @@
             <VSwitch v-model="saveBookmarksSpotify" label="Save bookmarks to Spotify playlist"></VSwitch>
           </VCol>
           <VCol>
-            <VBtn color="primary" @click.native="/*open playlist in browser*/">Open bookmarks playlist</VBtn>
+            <VBtn disabled color="primary" @click.native="/*open playlist in browser*/">Open bookmarks playlist</VBtn>
           </VCol>
         </VRow>
       </VCol>
@@ -37,12 +37,22 @@
     </VRow>
     <VRow no-gutters class="panel">
       <VCol>
+        <VRow class="panel-header">
+          <VCol>
+            File Formats
+          </VCol>
+        </VRow>
         <VRow no-gutters>
           <VCol>
-            <VBtn color="primary" @click.native="/*open dir*/">Open file directory</VBtn>
-            <VBtn color="primary" @click.native="/*add new file formatting thing*/">
+            <VBtn disabled color="primary" @click.native="/*open dir*/">Open file directory</VBtn>
+            <VBtn color="primary" @click.native="$store.dispatch('addFileFormat');">
               <VIcon dense>mdi-plus</VIcon> Add new file format
             </VBtn>
+          </VCol>
+        </VRow>
+        <VRow>
+          <VCol>
+            <FileFormat v-for="(format, index) in fileFormats" :key="index" v-model="fileFormats[index]" @update="$store.dispatch('updateFileFormat', { format: $event, index })" @remove="$store.dispatch('removeFileFormat', index);" />
           </VCol>
         </VRow>
       </VCol>
@@ -62,13 +72,20 @@
   </VContainer>
 </template>
 <script>
+import FileFormat from '@/components/FileFormat.vue';
+
 export default {
   name: 'Authorized',
 
-  data: () => ({
-    // Debug
-    allowAuthRefresh: true,
-  }),
+  components: {
+    FileFormat
+  },
+  data() {
+    return {
+      // Debug
+      allowAuthRefresh: true,
+    };
+  },
 
   computed: {
     crossfade: {
@@ -100,9 +117,14 @@ export default {
         await this.$store.dispatch('changeConfigProp', { prop: 'saveBookmarksSpotify', value });
       },
     },
+
+    fileFormats() {
+      return this.$store.state.config.fileFormats;
+    },
   },
 
   methods: {
+    // Debug
     async forceAuthRefresh() {
       this.allowAuthRefresh = false;
       await this.$store.dispatch('requestAccessToken');
