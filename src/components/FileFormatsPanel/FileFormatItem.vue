@@ -15,7 +15,7 @@
 </template>
 <script>
 export default {
-  name: 'FileFormat',
+  name: 'FileFormatItem',
 
   props: {
     value: {
