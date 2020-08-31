@@ -78,7 +78,15 @@ export default {
     },
 
     async storeConfig({ state }) {
-      await ipcRenderer.invoke('write-file', 'config', 'config.json', json5.stringify(state));
+      const stateCopy = { ...state };
+
+      // Remove blank info
+      const fileFormatsCopy = [...stateCopy.fileFormats]
+        .filter(format => format.filename !== '' || format.format !== '');
+
+      stateCopy.fileFormats = fileFormatsCopy;
+
+      await ipcRenderer.invoke('write-file', 'config', 'config.json', json5.stringify(stateCopy));
     },
 
     async changeConfigProp({ commit, dispatch }, { prop, value }) {
@@ -93,13 +101,24 @@ export default {
 
       if (!emptyExists) {
         commit('ADD_FILE_FORMAT');
+        await dispatch('storeConfig');
       }
-
-      await dispatch('storeConfig');
     },
-    
-    async updateFileFormat({ commit, dispatch }, { format, index }) {
+
+    async updateFileFormat({ state, commit, dispatch }, { format, index }) {
       commit('UPDATE_FILE_FORMAT', { format, index });
+      
+      if (format.filename === '' && format.format === '') {
+        // If this file format changes to completely empty, then remove other empty one
+        const emptyIndex = state.fileFormats
+          .findIndex((format, formatIndex) => format.filename === '' &&
+            format.format === '' &&
+            formatIndex !== index);
+
+        if (emptyIndex >= 0) {
+          commit('DELETE_FILE_FORMAT', emptyIndex);
+        }
+      }
 
       await dispatch('storeConfig');
     },
