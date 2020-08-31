@@ -37,19 +37,18 @@ export default {
 
       return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     },
-    
+
     minimizeWindow() {
       ipcRenderer.send('minimize-window');
     },
-    
+
     maximizeWindow() {
       ipcRenderer.send('maximize-window');
     },
-    
+
     closeWindow() {
       ipcRenderer.send('close-window');
     },
   },
 };
-
 </script>

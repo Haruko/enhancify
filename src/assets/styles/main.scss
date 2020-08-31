@@ -15,7 +15,7 @@ html {
 }
 
 .main-layout {
-  padding: 0rem;
+  /*padding: 0rem;*/
 
   height: 100%;
   overflow: auto !important;
@@ -61,8 +61,7 @@ html {
   background-color: none;
   border-radius: 0.5rem;
 
-  padding: 0rem;
-  margin: 0.25rem 2rem;
+  padding-left: 1rem;
   font-size: 1.75rem;
 }
 
@@ -71,19 +70,11 @@ html {
 
   border-radius: 0.5rem;
   padding: 1rem;
-  margin: 1rem;
-
-  /* Set the different style for panels that are after a header */
-  .header~& {
-    margin: 0rem 1rem;
-  }
 
   .panel-header {
     background-color: none;
     border-radius: 0.5rem;
 
-    padding: 0rem;
-    margin: 0rem;
     font-size: 1.25rem;
   }
 }
@@ -91,7 +82,7 @@ html {
 .v-btn {
   margin: 0.25rem;
 
-  &.square {
+  /*&.square {
     padding: 0rem !important;
 
     &.v-size--small {
@@ -113,5 +104,9 @@ html {
       height: 3.71rem !important;
       min-width: 3.71rem !important;
     }
-  }
+  }*/
+}
+
+.v-label {
+  /*background-color: red;*/
 }
