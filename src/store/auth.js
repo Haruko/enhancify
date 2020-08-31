@@ -23,36 +23,8 @@ export default {
   },
 
   mutations: {
-    SET_CODE_STATE(state, newState) {
-      state.state = newState;
-    },
-
-    SET_CODE_PAIR(state, codePair) {
-      state.codePair = codePair;
-    },
-
-    SET_ACCESS_TOKEN(state, token) {
-      state.access_token = token;
-    },
-
-    SET_TOKEN_TYPE(state, token) {
-      state.token_type = token;
-    },
-
-    SET_EXPIRES_IN(state, token) {
-      state.expires_in = token;
-    },
-
-    SET_REFRESH_TOKEN(state, token) {
-      state.refresh_token = token;
-    },
-
-    SET_REFRESH_TOKEN_TIMEOUT_ID(state, id) {
-      state.refreshTokenTimeoutID = id;
-    },
-
-    SET_REFRESH_FAIL_COUNT(state, count) {
-      state.refreshFailCount = count;
+    SET_AUTH_PROP(state, { prop, value }) {
+      state[prop] = value;
     },
   },
 
@@ -65,8 +37,8 @@ export default {
         codeVerifier: localStorage.codeVerifier,
       };
 
-      commit('SET_CODE_STATE', localState);
-      commit('SET_CODE_PAIR', localCodePair);
+      commit('SET_AUTH_PROP', { prop: 'state', value: localState });
+      commit('SET_AUTH_PROP', { prop: 'codePair', value: localCodePair });
     },
 
     // Save state and codePair to localStorage
@@ -113,10 +85,10 @@ export default {
         // Successful response
         let { access_token, token_type, expires_in, refresh_token } = tokenResponse.data;
 
-        commit('SET_ACCESS_TOKEN', access_token);
-        commit('SET_TOKEN_TYPE', token_type);
-        commit('SET_EXPIRES_IN', expires_in);
-        commit('SET_REFRESH_TOKEN', refresh_token);
+        commit('SET_AUTH_PROP', { prop: 'access_token', value: access_token });
+        commit('SET_AUTH_PROP', { prop: 'token_type', value: token_type });
+        commit('SET_AUTH_PROP', { prop: 'expires_in', value: expires_in });
+        commit('SET_AUTH_PROP', { prop: 'refresh_token', value: refresh_token });
 
         await dispatch('setupRefreshTokenTimeout');
 
@@ -127,11 +99,11 @@ export default {
       } else {
         // No success
 
-        commit('SET_ACCESS_TOKEN', undefined);
-        commit('SET_TOKEN_TYPE', undefined);
-        commit('SET_EXPIRES_IN', undefined);
-        commit('SET_REFRESH_TOKEN', undefined);
-        
+        commit('SET_AUTH_PROP', { prop: 'access_token', value: undefined });
+        commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
+        commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
+        commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
+
         return false;
       }
     },
@@ -149,10 +121,10 @@ export default {
         const success = await dispatch('requestAccessToken');
 
         if (success) {
-          commit('SET_REFRESH_FAIL_COUNT', 0);
+          commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 });
           await dispatch('setupRefreshTokenTimeout');
         } else {
-          commit('SET_REFRESH_FAIL_COUNT', state.refreshFailCount + 1);
+          commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: state.refreshFailCount + 1 });
           await dispatch('setupRefreshTokenTimeout');
           if (state.refreshFailCount === 5) {
             await dispatch('deAuth');
@@ -161,7 +133,7 @@ export default {
         }
       }, timeoutLength);
 
-      commit('SET_REFRESH_TOKEN_TIMEOUT_ID', refreshTokenTimeoutID);
+      commit('SET_AUTH_PROP', { prop: 'refreshTokenTimeoutID', value: refreshTokenTimeoutID });
     },
 
     // Load refresh token from file
@@ -169,7 +141,7 @@ export default {
       let token = await ipcRenderer.invoke('read-file', 'token', 'refresh.token');
 
       if (token !== null) {
-        commit('SET_REFRESH_TOKEN', token);
+        commit('SET_AUTH_PROP', { prop: 'refresh_token', value: token });
         return true;
       } else {
         return false;
@@ -183,15 +155,15 @@ export default {
 
     // Force removal of auth
     async deAuth({ state, commit }) {
+      commit('SET_AUTH_PROP', { prop: 'state', value: pkce.createChallenge() });
+      commit('SET_AUTH_PROP', { prop: 'codePair', value: pkce.create() });
+      commit('SET_AUTH_PROP', { prop: 'access_token', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
       clearTimeout(state.refreshTokenTimeoutID);
-      commit('SET_CODE_STATE', pkce.createChallenge());
-      commit('SET_CODE_PAIR', pkce.create());
-      commit('SET_ACCESS_TOKEN', undefined);
-      commit('SET_REFRESH_TOKEN', undefined);
-      commit('SET_TOKEN_TYPE', undefined);
-      commit('SET_EXPIRES_IN', undefined);
-      commit('SET_REFRESH_TOKEN_TIMEOUT_ID', undefined);
-      commit('SET_REFRESH_FAIL_COUNT', 0);
+      commit('SET_AUTH_PROP', { prop: 'refreshTokenTimeoutID', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 })
 
       await ipcRenderer.invoke('delete-file', 'token', 'refresh.token');
     },

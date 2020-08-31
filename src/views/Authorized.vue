@@ -6,7 +6,8 @@
       </div>
       <div class="panel">
         <VSlider dense v-model="crossfade" label="Crossfade" hint="Match this to the setting in Spotify" persistent-hint min="0" max="12" ticks thumb-label="always" thumb-size=0></VSlider>
-        <VSwitch v-model="bookmarkPlaylist" label="Save bookmarks to Spotify playlist" readonly></VSwitch>
+        <VSwitch v-model="saveBookmarksLocal" label="Save bookmarks to local file"></VSwitch>
+        <VSwitch v-model="saveBookmarksSpotify" label="Save bookmarks to Spotify playlist"></VSwitch>
       </div>
     </div>
     <div>
@@ -33,12 +34,41 @@ export default {
   name: 'Authorized',
 
   data: () => ({
-    crossfade: 0,
-    bookmarkPlaylist: false,
-
     // Debug
     allowAuthRefresh: true,
   }),
+
+  computed: {
+    crossfade: {
+      get() {
+        return this.$store.state.config.crossfade;
+      },
+
+      async set(value) {
+        await this.$store.dispatch('changeConfigProp', { prop: 'crossfade', value });
+      },
+    },
+    
+    saveBookmarksLocal: {
+      get() {
+        return this.$store.state.config.saveBookmarksLocal;
+      },
+
+      async set(value) {
+        await this.$store.dispatch('changeConfigProp', { prop: 'saveBookmarksLocal', value });
+      },
+    },
+    
+    saveBookmarksSpotify: {
+      get() {
+        return this.$store.state.config.saveBookmarksSpotify;
+      },
+
+      async set(value) {
+        await this.$store.dispatch('changeConfigProp', { prop: 'saveBookmarksSpotify', value });
+      },
+    },
+  },
 
   methods: {
     async forceAuthRefresh() {
