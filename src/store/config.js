@@ -25,7 +25,9 @@ export default {
 
     // Editable by user in frontend
     saveBookmarksLocal: true,
+    allowDupesLocal: false,
     saveBookmarksSpotify: false,
+    allowDupesSpotify: false,
   },
 
   mutations: {
