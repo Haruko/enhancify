@@ -1,10 +1,10 @@
 const path = require('path');
 const fs = require('fs-extra');
-import { app, ipcMain } from 'electron'
+import { app, ipcMain, shell } from 'electron'
 
 export function initIPC(win) {
   /**
-    Electron IPC
+    Send actions
   **/
   ipcMain.on('minimize-window', (event) => {
     win.minimize();
@@ -22,6 +22,21 @@ export function initIPC(win) {
     win.close();
   });
 
+  ipcMain.on('open-directory', async (event, type, file) => {
+    const dirPath = getFileBasePath(type);
+    
+    await fs.ensureDir(dirPath);
+    
+    if (typeof file !== 'undefined') {
+      await shell.showItemInFolder(path.join(dirPath, file));
+    } else {
+      await shell.openPath(dirPath);
+    }
+  });
+
+  /**
+    Invoke-able actions
+  **/
   // Read file and send data back to renderer
   ipcMain.handle('read-file', async (event, type, filePath) => {
     const newPath = path.join(getFileBasePath(type), filePath);

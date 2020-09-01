@@ -1,10 +1,8 @@
 <template>
-  <VRow no-gutters class="panel">
-    <VCol>
-      <VBtn color="primary" @click.native="deAuth()">De-Auth</VBtn>
-      <VBtn color="primary" @click.native="forceAuthRefresh()" :disabled="!allowAuthRefresh">Force Auth Refresh</VBtn>
-      <VBtn color="primary" @click.native="reloadConfig()">Reload Config</VBtn>
-    </VCol>
+  <VRow no-gutters class="panel" justify="end">
+    <VBtn color="primary" @click.native="deAuth()">De-Auth</VBtn>
+    <VBtn color="primary" @click.native="forceAuthRefresh()" :disabled="!allowAuthRefresh">Force Auth Refresh</VBtn>
+    <VBtn color="primary" @click.native="reloadConfig()">Reload Config</VBtn>
   </VRow>
 </template>
 <script>

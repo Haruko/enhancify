@@ -8,7 +8,7 @@
       </VRow>
       <VRow no-gutters>
         <VCol>
-          <VBtn disabled color="primary" @click.native="/*open dir*/">Open file directory</VBtn>
+          <VBtn color="primary" @click.native="openOutputDir">Open output directory</VBtn>
           <VBtn color="primary" @click.native="$store.dispatch('addFileFormat');">
             <VIcon dense>mdi-plus</VIcon> Add new file format
           </VBtn>
@@ -24,6 +24,7 @@
 </template>
 <script>
 import FileFormatItem from './FileFormatItem.vue';
+import { ipcRenderer } from 'electron';
 
 export default {
   name: 'FileFormatsPanel',
@@ -35,6 +36,12 @@ export default {
   computed: {
     fileFormats() {
       return this.$store.state.config.fileFormats;
+    },
+  },
+
+  methods: {
+    openOutputDir() {
+      ipcRenderer.send('open-directory', 'output');
     },
   },
 }
