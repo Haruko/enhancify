@@ -1,0 +1,24 @@
+{
+  filesystem: {
+    config: {
+      pathBase: 'userData',
+      directory: 'config',
+      filename: 'config.json'
+    },
+    token: {
+      pathBase: 'userData',
+      directory: 'config',
+      filename: 'refresh.token'
+    },
+    output: {
+      pathBase: 'documents',
+      directory: 'enhancify',
+      filename: null
+    },
+    bookmarks: {
+      pathBase: 'documents',
+      directory: 'enhancify',
+      filename: 'bookmarks.csv'
+    },
+  },
+}

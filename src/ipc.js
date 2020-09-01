@@ -1,8 +1,10 @@
 const path = require('path');
 const fs = require('fs-extra');
+const json5 = require('json5');
+
 import { app, ipcMain, shell } from 'electron'
 
-
+import config from 'json5-loader!./config.json5';
 
 export function initIPC(win) {
   /**
@@ -90,27 +92,22 @@ export function initIPC(win) {
 };
 
 function getFileBasePath(type) {
-  switch (type) {
-    case 'config':
-    case 'token':
-      return path.join(app.getPath('userData'), 'config');
-    case 'output':
-    case 'bookmarks':
-      return path.join(app.getPath('documents'), 'enhancify');
-    default:
-      return undefined;
-  };
+  const filesystemConfig = config.filesystem[type];
+  
+  if (typeof filesystemConfig !== 'undefined') {
+    return path.join(app.getPath(filesystemConfig.pathBase), filesystemConfig.directory);
+  } else {
+    return undefined;
+  }
 }
 
 function getFileName(type) {
-  switch (type) {
-    case 'config':
-      return 'config.json';
-    case 'token':
-      return 'refresh.token';
-    case 'bookmarks':
-      return 'bookmarks.csv';
-    default:
-      return undefined;
-  };
+  const filesystemConfig = config.filesystem[type];
+  
+  if (typeof filesystemConfig !== 'undefined') {
+    const filename = filesystemConfig.filename
+    return filename === null ? undefined : filename;
+  } else {
+    return undefined;
+  }
 }

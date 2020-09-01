@@ -9,10 +9,10 @@ module.exports = {
     electronBuilder: {
       nodeModulesPath: ['./node_modules'],
       nodeIntegration: true,
-      mainProcessWatch: ['src/ipc.js'],
+      mainProcessWatch: ['src/ipc.js', 'src/config.json5'],
     },
   },
-  
+
   // configureWebpack: {
   //   devServer: {
   //     watchOptions: {
