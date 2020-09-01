@@ -138,7 +138,7 @@ export default {
 
     // Load refresh token from file
     async loadRefreshToken({ commit }) {
-      let token = await ipcRenderer.invoke('read-file', 'token', 'refresh.token');
+      let token = await ipcRenderer.invoke('read-file', 'token');
 
       if (token !== null) {
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: token });
@@ -150,7 +150,7 @@ export default {
 
     // Store refresh token in file
     async storeRefreshToken({ state }) {
-      await ipcRenderer.invoke('write-file', 'token', 'refresh.token', state.refresh_token);
+      await ipcRenderer.invoke('write-file', 'token', state.refresh_token);
     },
 
     // Force removal of auth
@@ -165,7 +165,7 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'refreshTokenTimeoutID', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 })
 
-      await ipcRenderer.invoke('delete-file', 'token', 'refresh.token');
+      await ipcRenderer.invoke('delete-file', 'token');
     },
   },
 

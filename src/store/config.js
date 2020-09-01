@@ -59,7 +59,7 @@ export default {
   actions: {
     async loadConfig({ commit, dispatch }) {
       // Try to read file
-      let config = await ipcRenderer.invoke('read-file', 'config', 'config.json');
+      let config = await ipcRenderer.invoke('read-file', 'config');
 
       if (config !== null) {
         try {
@@ -86,7 +86,7 @@ export default {
 
       stateCopy.fileFormats = fileFormatsCopy;
 
-      await ipcRenderer.invoke('write-file', 'config', 'config.json', json5.stringify(stateCopy));
+      await ipcRenderer.invoke('write-file', 'config', json5.stringify(stateCopy));
     },
 
     async changeConfigProp({ commit, dispatch }, { prop, value }) {

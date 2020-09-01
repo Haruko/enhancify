@@ -1,15 +1,12 @@
 <template>
   <VRow no-gutters class="panel">
     <VCol>
-      <VRow class="panel-header">
-        <VCol>
-          File Formats
-        </VCol>
-      </VRow>
       <VRow no-gutters>
         <VCol>
-          <VBtn color="primary" @click.native="openOutputDir">Open output directory</VBtn>
-          <VBtn color="primary" @click.native="$store.dispatch('addFileFormat');">
+          <VBtn color="primary" small @click.native="openOutputDir">Open output directory</VBtn>
+        </VCol>
+        <VCol class="text-right">
+          <VBtn color="primary" small @click.native="$store.dispatch('addFileFormat');">
             <VIcon dense>mdi-plus</VIcon> Add new file format
           </VBtn>
         </VCol>

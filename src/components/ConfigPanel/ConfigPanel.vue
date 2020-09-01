@@ -30,7 +30,7 @@ export default {
     },
 
     openConfigDir() {
-      ipcRenderer.send('open-directory', 'config', 'config.json');
+      ipcRenderer.send('open-directory', 'config');
     },
   }
 }
