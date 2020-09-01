@@ -27,26 +27,22 @@ export function initIPC(win) {
   });
 
   ipcMain.on('open-directory', async (event, type) => {
-    try {
-      const dirPath = getFileBasePath(type);
-      const filename = getFileName(type);
+    const dirPath = getFileBasePath(type);
+    const filename = getFileName(type);
 
-      await fs.ensureDir(dirPath);
+    await fs.ensureDir(dirPath);
 
-      if (typeof filename !== 'undefined') {
-        const filePath = path.join(dirPath, filename);
-        const fileExists = await fs.pathExists(filePath);
+    if (typeof filename !== 'undefined') {
+      const filePath = path.join(dirPath, filename);
+      const fileExists = await fs.pathExists(filePath);
 
-        if (fileExists) {
-          await shell.showItemInFolder(filePath);
-        } else {
-          await shell.openPath(dirPath);
-        }
+      if (fileExists) {
+        await shell.showItemInFolder(filePath);
       } else {
         await shell.openPath(dirPath);
       }
-    } catch (error) {
-      console.log(error);
+    } else {
+      await shell.openPath(dirPath);
     }
   });
 
@@ -93,7 +89,7 @@ export function initIPC(win) {
 
 function getFileBasePath(type) {
   const filesystemConfig = config.filesystem[type];
-  
+
   if (typeof filesystemConfig !== 'undefined') {
     return path.join(app.getPath(filesystemConfig.pathBase), filesystemConfig.directory);
   } else {
@@ -103,7 +99,7 @@ function getFileBasePath(type) {
 
 function getFileName(type) {
   const filesystemConfig = config.filesystem[type];
-  
+
   if (typeof filesystemConfig !== 'undefined') {
     const filename = filesystemConfig.filename
     return filename === null ? undefined : filename;

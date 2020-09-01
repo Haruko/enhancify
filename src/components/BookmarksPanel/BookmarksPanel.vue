@@ -2,6 +2,13 @@
   <VRow no-gutters class="panel">
     <VCol>
       <VRow no-gutters align="center">
+        <VCol>
+          ||Hotkey Stuff Here||
+          ||Hotkey Stuff Here||
+          ||Hotkey Stuff Here||
+        </VCol>
+      </VRow>
+      <VRow no-gutters align="center">
         <VCol cols="6">
           <VSwitch v-model="saveBookmarksLocal" dense hide-details="true" label="Save to local file"></VSwitch>
         </VCol>
@@ -11,7 +18,7 @@
       </VRow>
       <VRow no-gutters align="center">
         <VCol class="offset-sm-1" cols="5">
-          <VSwitch v-if="saveBookmarksLocal" v-model="allowDupesLocal" :disabled="!saveBookmarksLocal" dense hide-details="true" label="Allow duplicates"></VSwitch>
+          <VSwitch v-model="allowDupesLocal" :disabled="!saveBookmarksLocal" dense hide-details="true" label="Allow duplicates"></VSwitch>
         </VCol>
         <VCol cols="6">
           <VBtn color="primary" small @click.native="openBookmarksDir">Open bookmarks directory</VBtn>
@@ -27,7 +34,7 @@
       </VRow>
       <VRow no-gutters align="center">
         <VCol class="offset-sm-1" cols="5">
-          <VSwitch v-if="saveBookmarksSpotify" v-model="allowDupesSpotify" :disabled="!saveBookmarksSpotify" dense hide-details="true" label="Allow duplicates"></VSwitch>
+          <VSwitch v-model="allowDupesSpotify" :disabled="!saveBookmarksSpotify" dense hide-details="true" label="Allow duplicates"></VSwitch>
         </VCol>
       </VRow>
     </VCol>

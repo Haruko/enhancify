@@ -1,7 +1,7 @@
 <template>
   <div class="title-bar">
     <div class="title-label">
-      Enhancify
+      Enhancify{{ nowPlayingText ? ` - ${nowPlayingText}` : '' }}
     </div>
     <div class="window-controls">
       <VIcon dense dark class="minimize-window" @click.native="minimizeWindow">mdi-window-minimize</VIcon>
@@ -15,6 +15,12 @@ import { ipcRenderer } from 'electron';
 
 export default {
   name: 'TitleBar',
+  
+  computed: {
+    nowPlayingText() {
+      return this.$store.state.nowplaying.nowPlayingText;
+    },
+  },
 
   mounted() {
     this.updateNow();

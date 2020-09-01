@@ -17,6 +17,10 @@ export default {
     token_type: undefined,
     expires_in: undefined,
 
+    authHeader: {
+      Authorization: '',
+    },
+
     refresh_token: undefined,
     refreshTokenTimeoutID: undefined,
     refreshFailCount: 0,
@@ -88,6 +92,12 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'access_token', value: access_token });
         commit('SET_AUTH_PROP', { prop: 'token_type', value: token_type });
         commit('SET_AUTH_PROP', { prop: 'expires_in', value: expires_in });
+        commit('SET_AUTH_PROP', {
+          prop: 'authHeader',
+          value: {
+            Authorization: `${token_type} ${access_token}`,
+          }
+        });
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: refresh_token });
 
         await dispatch('setupRefreshTokenTimeout');
@@ -103,6 +113,7 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
+        commit('SET_AUTH_PROP', { prop: 'authHeader', value: undefined });
 
         return false;
       }
@@ -158,6 +169,7 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'state', value: pkce.createChallenge() });
       commit('SET_AUTH_PROP', { prop: 'codePair', value: pkce.create() });
       commit('SET_AUTH_PROP', { prop: 'access_token', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'authHeader', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
