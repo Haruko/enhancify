@@ -24,6 +24,42 @@ html {
 
 
 /**/
+/* Scroll Bar */
+/**/
+
+::-webkit-scrollbar {
+  background-color: transparent;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-corner,
+::-webkit-resizer {
+  display: none;
+}
+
+::-webkit-scrollbar-button {
+  background-color: transparent;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #FFFFFF10;
+  
+  border-radius: 5px;
+
+  &:hover {
+    background-color: #FFFFFF40;
+  }
+}
+
+
+
+/**/
 /* Title Bar */
 /**/
 
@@ -38,6 +74,8 @@ html {
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
   height: 1.8rem;
+  
+  border-bottom: 1px solid var(--v-background-base);
 }
 
 .title-label {
@@ -74,12 +112,12 @@ html {
   .panel-header {
     background-color: none;
     border-radius: 0.5rem;
-    
+
     padding-left: 1rem;
 
     font-size: 1.25rem;
   }
-  
+
   .panel {
     background-color: var(--v-panel_background-lighten1);
   }
