@@ -15,6 +15,11 @@
       directory: 'enhancify',
       filename: null
     },
+    album: {
+      pathBase: 'documents',
+      directory: 'enhancify',
+      filename: 'album.jpg'
+    },
     bookmarks: {
       pathBase: 'documents',
       directory: 'enhancify',
@@ -23,5 +28,9 @@
   },
   api: {
     maxRequestInterval: 10000, // ms
+  },
+  labels: {
+    startTag: '<<',
+    endTag: '>>',
   },
 }

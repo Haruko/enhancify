@@ -16,9 +16,11 @@ export default {
   methods: {
     async startStop() {
       if (this.running) {
-        this.$store.dispatch('stopUpdateTimeout');
+        await this.$store.dispatch('stopUpdateTimeout');
       } else {
-        this.$store.dispatch('startUpdateTimeout');
+        await this.$store.dispatch('getNowPlayingData');
+        await this.$store.dispatch('writeOutputFiles');
+        await this.$store.dispatch('startUpdateTimeout');
       }
     },
   },

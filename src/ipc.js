@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const json5 = require('json5');
+const download = require('download');
 
 import { app, ipcMain, shell } from 'electron'
 
@@ -46,8 +47,8 @@ export function initIPC(win) {
     }
   });
 
-  ipcMain.on('open-file', async (event, type) => {
-    const filePath = path.join(getFileBasePath(type), getFileName(type));
+  ipcMain.on('open-file', async (event, type, filename) => {
+    const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
 
     await fs.ensureFile(filePath);
     await shell.openPath(filePath);
@@ -57,33 +58,44 @@ export function initIPC(win) {
     Invoke-able actions
   **/
   // Read file and send data back to renderer
-  ipcMain.handle('read-file', async (event, type) => {
-    const newPath = path.join(getFileBasePath(type), getFileName(type));
-    console.log('read', newPath);
+  ipcMain.handle('read-file', async (event, type, filename) => {
+    const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
+    console.log('read', filePath);
 
-    const exists = await fs.pathExists(newPath);
+    const exists = await fs.pathExists(filePath);
     if (exists) {
-      return await fs.readFile(newPath, { encoding: 'utf8' });
+      return await fs.readFile(filePath, { encoding: 'utf8' });
     } else {
       return null;
     }
   });
 
   // Write file
-  ipcMain.handle('write-file', async (event, type, data) => {
-    const newPath = path.join(getFileBasePath(type), getFileName(type));
-    console.log('write', newPath);
+  ipcMain.handle('write-file', async (event, type, data, filename) => {
+    const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
+    console.log('write', filePath);
 
-    await fs.ensureFile(newPath);
-    await fs.writeFile(newPath, data, { flag: 'w' });
+    await fs.ensureFile(filePath);
+    await fs.writeFile(filePath, data, { flag: 'w' });
   });
 
   // Delete file
-  ipcMain.handle('delete-file', async (event, type) => {
-    const newPath = path.join(getFileBasePath(type), getFileName(type));
-    console.log('delete', newPath);
+  ipcMain.handle('delete-file', async (event, type, filename) => {
+    const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
+    console.log('delete', filePath);
 
-    await fs.remove(newPath);
+    await fs.remove(filePath);
+  });
+
+  // Download file
+  ipcMain.handle('download-file', async (event, url, type, filename) => {
+    if (typeof filename === 'undefined') {
+      filename = getFileName(type);
+    }
+    
+    console.log('download', url);
+    
+    await download(url, getFileBasePath(type), { filename: filename });
   });
 };
 
