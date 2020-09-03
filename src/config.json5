@@ -21,4 +21,7 @@
       filename: 'bookmarks.csv'
     },
   },
+  api: {
+    maxRequestInterval: 10000, // ms
+  },
 }

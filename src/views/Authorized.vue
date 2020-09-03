@@ -1,31 +1,6 @@
 <template>
-  <!-- <VContainer>
-      <VRow class="header">
-        <VCol>
-          Config
-        </VCol>
-      </VRow>
-      <ConfigPanel />
-      <VRow class="header">
-        <VCol>
-          Now Playing Labels
-        </VCol>
-      </VRow>
-      <FileFormatsPanel />
-      <VRow class="header">
-        <VCol>
-          Bookmarks
-        </VCol>
-      </VRow>
-      <BookmarksPanel />
-      <VRow class="header">
-        <VCol>
-          Debug
-        </VCol>
-      </VRow>
-      <DebugPanel />
-  </VContainer> -->
   <VContainer>
+    <ControlPanel />
     <VExpansionPanels v-model="panels" multiple flat accordion>
       <VExpansionPanel>
         <VExpansionPanelHeader class="header">
@@ -73,6 +48,7 @@
 }
 </style>
 <script>
+import ControlPanel from '@/components/ControlPanel/ControlPanel.vue';
 import ConfigPanel from '@/components/ConfigPanel/ConfigPanel.vue';
 import FileFormatsPanel from '@/components/FileFormatsPanel/FileFormatsPanel.vue';
 import BookmarksPanel from '@/components/BookmarksPanel/BookmarksPanel.vue';
@@ -82,6 +58,7 @@ export default {
   name: 'Authorized',
 
   components: {
+    ControlPanel,
     ConfigPanel,
     FileFormatsPanel,
     BookmarksPanel,
