@@ -32,7 +32,8 @@ export default new Vuetify({
         secondary: '#1b4d2c',
         accent: '#1d82b9',
 
-        error: '#b92a1d',
+        error: '#cd1a2c',
+        // error: '#b92a1d',
         info: '#1d82b9',
         success: '#1DB954',
         warning: '#b9511d',

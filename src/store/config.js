@@ -48,7 +48,6 @@ export default {
 
     UPDATE_FILE_FORMAT(state, { format, index }) {
       Vue.set(state.fileFormats, index, format);
-      // state.fileFormats[index] = format;
     },
 
     DELETE_FILE_FORMAT(state, index) {
