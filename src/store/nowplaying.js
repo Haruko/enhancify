@@ -119,10 +119,8 @@ export default {
 
       // Album art
       const albumArt = state.nowPlayingData.item.album.images;
-      console.log(albumArt)
       if (typeof albumArt === 'object' && albumArt.length > 0) {
         const url = albumArt[0].url;
-        console.log(url)
         await ipcRenderer.invoke('download-file', url, 'album');
       }
     },
