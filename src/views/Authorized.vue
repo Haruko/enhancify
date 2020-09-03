@@ -1,7 +1,7 @@
 <template>
   <VContainer>
     <ControlPanel />
-    <VExpansionPanels v-model="panels" multiple flat accordion>
+    <VExpansionPanels v-model="panels" multiple flat accordion class="main-panels">
       <VExpansionPanel>
         <VExpansionPanelHeader class="header">
           Config
@@ -37,16 +37,6 @@
     </VExpansionPanels>
   </VContainer>
 </template>
-<style>
-.v-expansion-panel {
-  background-color: rgba(0, 0, 0, 0) !important;
-}
-
-.v-expansion-panel-header,
-.v-expansion-panel-content__wrap {
-  padding: 0px !important;
-}
-</style>
 <script>
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue';
 import ConfigPanel from '@/components/ConfigPanel/ConfigPanel.vue';

@@ -97,12 +97,11 @@ export default {
     },
 
     // File formats
-    async addFileFormat({ state, commit, dispatch }) {
+    async addFileFormat({ state, commit }) {
       const emptyExists = state.fileFormats.filter((format) => format.filename === '' && format.format === '').length > 0;
 
       if (!emptyExists) {
         commit('ADD_FILE_FORMAT');
-        await dispatch('storeConfig');
         return true;
       } else {
         return false;

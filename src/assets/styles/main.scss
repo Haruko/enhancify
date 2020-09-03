@@ -14,11 +14,18 @@ html {
   font-size: 14px;
 }
 
-.main-layout {
-  /*padding: 0rem;*/
+.title-bar {
+  margin-bottom: 1rem;
+}
 
+.main-layout {
   height: 100%;
-  overflow: auto !important;
+  overflow: scroll !important;
+  
+  &>.content>.container {
+    padding-right: 0.5rem !important;
+    padding-bottom: 0rem !important;
+  }
 }
 
 
@@ -101,6 +108,19 @@ html {
 
   padding-left: 1rem;
   font-size: 1.75rem;
+}
+
+.main-panels>.v-expansion-panel>.header {
+  min-height: 4rem !important;
+  padding: 0px !important;
+}
+
+.main-panels>.v-expansion-panel {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.main-panels>.v-expansion-panel>.v-expansion-panel-content>.v-expansion-panel-content__wrap {
+  padding: 0px !important;
 }
 
 .panel {

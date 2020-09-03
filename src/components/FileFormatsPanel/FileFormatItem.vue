@@ -1,11 +1,11 @@
 <template>
   <VForm v-model="valid" ref="form" @submit.prevent="save">
     <input type="submit" hidden />
-    <VRow no-gutters class="panel mb-2" align="center">
+    <VRow no-gutters class="panel mb-3" align="center">
       <VCol cols="3" class="flex-grow-1 flex-shrink-0 mr-2">
         <VTextField v-model="filename" :rules="filenameRules" label="Filename" hide-details="true" dense required></VTextField>
       </VCol>
-      <VCol class="flex-grow-1 flex-shrink-0">
+      <VCol class="flex-grow-1 flex-shrink-0 mr-2">
         <VTextField v-model="format" label="Format" hide-details="true" dense></VTextField>
       </VCol>
       <VCol v-if="valid && (filename !== value.filename || format !== value.format)" cols="0" class="flex-grow-0 flex-shrink-0">
