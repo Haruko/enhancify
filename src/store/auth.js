@@ -8,7 +8,7 @@ import router from '../router'
 export default {
   state: {
     port: 8080,
-    scope: 'user-read-playback-state',
+    scope: ['user-read-playback-state'].join(' '),
 
     state: pkce.createChallenge(),
     codePair: pkce.create(),
@@ -16,10 +16,6 @@ export default {
     access_token: undefined,
     token_type: undefined,
     expires_in: undefined,
-
-    authHeader: {
-      Authorization: '',
-    },
 
     refresh_token: undefined,
     refreshTokenTimeoutID: undefined,
@@ -92,12 +88,6 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'access_token', value: access_token });
         commit('SET_AUTH_PROP', { prop: 'token_type', value: token_type });
         commit('SET_AUTH_PROP', { prop: 'expires_in', value: expires_in });
-        commit('SET_AUTH_PROP', {
-          prop: 'authHeader',
-          value: {
-            Authorization: `${token_type} ${access_token}`,
-          }
-        });
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: refresh_token });
 
         await dispatch('setupRefreshTokenTimeout');
@@ -113,7 +103,6 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
-        commit('SET_AUTH_PROP', { prop: 'authHeader', value: undefined });
 
         return false;
       }
@@ -148,11 +137,12 @@ export default {
     },
 
     // Load refresh token from file
-    async loadRefreshToken({ commit }) {
+    async loadRefreshToken({ commit, dispatch }) {
       let token = await ipcRenderer.invoke('read-file', 'token');
 
       if (token !== null) {
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: token });
+        await dispatch('requestAccessToken');
         return true;
       } else {
         return false;
@@ -169,7 +159,6 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'state', value: pkce.createChallenge() });
       commit('SET_AUTH_PROP', { prop: 'codePair', value: pkce.create() });
       commit('SET_AUTH_PROP', { prop: 'access_token', value: undefined });
-      commit('SET_AUTH_PROP', { prop: 'authHeader', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
@@ -197,6 +186,12 @@ export default {
         `scope=${state.scope}`;
 
       return authURI;
+    },
+
+    authHeader(state) {
+      return {
+        Authorization: `${state.token_type} ${state.access_token}`,
+      };
     },
   },
 };

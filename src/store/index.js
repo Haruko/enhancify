@@ -24,15 +24,7 @@ export default new Vuex.Store({
   },
 
   getters: {
-    // publicPath() {
-    //   const isBuild = process.env.NODE_ENV === 'production'
-    //   const publicPath = path.join(
-    //     (isBuild ? __dirname : __static),
-    //     (isBuild ? '../../' : '')
-    //   );
-      
-    //   return publicPath;
-    // },
+
   },
 
   modules: {

@@ -3,9 +3,6 @@ const axios = require('axios');
 export default {
   state: {
     nowPlayingData: null,
-
-    nowPlayingText: null,
-
   },
 
   mutations: {
@@ -15,11 +12,10 @@ export default {
   },
 
   actions: {
-    async getNowPlayingData({ rootState, commit }) {
-      console.log(rootState.auth.authHeader)
+    async getNowPlayingData({ rootGetters, commit }) {
       let responseData;
       try {
-        const response = await axios.get('https://api.spotify.com/v1/me/player', { headers: rootState.auth.authHeader, });
+        const response = await axios.get('https://api.spotify.com/v1/me/player', { headers: rootGetters.authHeader, });
 
         responseData = response.data;
       } catch (error) {

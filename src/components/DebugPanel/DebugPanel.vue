@@ -20,7 +20,7 @@ export default {
   methods: {
     async getNowPlayingData() {
       await this.$store.dispatch('getNowPlayingData');
-      console.log(this.$store.state.nowplaying.nowPlayData);
+      console.log(this.$store.state.nowplaying.nowPlayingData);
     },
 
     async deAuth() {
