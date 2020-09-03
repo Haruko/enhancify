@@ -14,13 +14,10 @@ html {
   font-size: 14px;
 }
 
-.title-bar {
-  margin-bottom: 1rem;
-}
-
 .main-layout {
   height: 100%;
-  overflow: scroll !important;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
   
   &>.content>.container {
     padding-right: 0.5rem !important;
