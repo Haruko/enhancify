@@ -13,7 +13,7 @@
       </VRow>
       <VRow>
         <VCol>
-          <FileFormatItem v-for="(format, index) in fileFormats" :key="index" v-model="fileFormats[index]" @save="updateFileFormat($event, index);" @remove="removeFileFormat(index);" />
+          <FileFormatItem v-for="(format, index) in fileFormats" :key="index" :ref="`FileFormatItem_${index}`" v-model="fileFormats[index]" @save="updateFileFormat($event, index);" @remove="removeFileFormat(index);" />
         </VCol>
       </VRow>
     </VCol>
@@ -40,15 +40,20 @@ export default {
     openOutputDir() {
       ipcRenderer.send('open-directory', 'output');
     },
-    
+
     async addFileFormat() {
-      await this.$store.dispatch('addFileFormat');
+      const added = await this.$store.dispatch('addFileFormat');
+
+      if (added) {
+        const ref = `FileFormatItem_${this.fileFormats.length - 1}`;
+        this.$refs[ref][0].$el[1].focus();
+      }
     },
-    
+
     async updateFileFormat(format, index) {
       await this.$store.dispatch('updateFileFormat', { format, index });
     },
-    
+
     async removeFileFormat(index) {
       await this.$store.dispatch('removeFileFormat', index);
     },

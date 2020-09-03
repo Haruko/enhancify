@@ -1,9 +1,9 @@
 <template>
-  <VForm v-model="valid" @submit.prevent="save">
+  <VForm v-model="valid" ref="form" @submit.prevent="save">
     <input type="submit" hidden />
     <VRow no-gutters class="panel mb-2" align="center">
       <VCol cols="3" class="flex-grow-1 flex-shrink-0 mr-2">
-        <VTextField v-model="filename" :rules="filenameRules" label="Filename" hide-details="true" dense required autofocus></VTextField>
+        <VTextField v-model="filename" :rules="filenameRules" label="Filename" hide-details="true" dense required></VTextField>
       </VCol>
       <VCol class="flex-grow-1 flex-shrink-0">
         <VTextField v-model="format" label="Format" hide-details="true" dense></VTextField>
@@ -38,16 +38,39 @@ export default {
       format: this.value.format,
       valid: false,
       filenameRules: [
-        value => !!value.trim() || ''
+        // Empty filename
+        value => !!value.trim() || '',
+        // Duplicate filename
+        value => {
+          // Only check if we changed the filename
+          if (value !== this.value.filename) {
+            return this.fileFormats.findIndex((format) => format.filename === value) === -1;
+          } else {
+            return true;
+          }
+        }
       ],
     };
+  },
+
+  computed: {
+    // For watching
+    fileFormats() {
+      return this.$store.state.config.fileFormats;
+    },
   },
 
   watch: {
     value(newValue) {
       this.filename = newValue.filename;
       this.format = newValue.format;
-    }
+      this.$refs.form.validate();
+    },
+
+    // For duplicate filename validation
+    fileFormats() {
+      this.$refs.form.validate();
+    },
   },
 
   methods: {

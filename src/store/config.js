@@ -103,6 +103,9 @@ export default {
       if (!emptyExists) {
         commit('ADD_FILE_FORMAT');
         await dispatch('storeConfig');
+        return true;
+      } else {
+        return false;
       }
     },
 
