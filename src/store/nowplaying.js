@@ -163,6 +163,10 @@ export default {
         }
       }
     },
+    
+    async bookmarkNowPlaying() {
+      console.log('Bookmark!');
+    },
   },
 
   getters: {

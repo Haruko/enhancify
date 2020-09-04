@@ -21,7 +21,7 @@ export default {
     crossfade: 0,
 
     // Editable by user in frontend
-    hotkey: [54, 61010],
+    hotkey: 'Shift+Insert',
 
     // Editable by user in frontend
     saveBookmarksLocal: true,
@@ -58,7 +58,7 @@ export default {
   },
 
   actions: {
-    async loadConfig({ commit, dispatch }) {
+    async loadConfig({ state, commit, dispatch }) {
       // Try to read file
       let config = await ipcRenderer.invoke('read-file', 'config');
 
@@ -76,6 +76,8 @@ export default {
         // No config file found
         await dispatch('storeConfig');
       }
+      
+      await ipcRenderer.send('load-hotkey', state.hotkey);
     },
 
     async storeConfig({ state }) {

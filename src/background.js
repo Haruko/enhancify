@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, globalShortcut } from 'electron'
 import { initIPC } from './ipc.js'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
@@ -62,6 +62,10 @@ function createWindow() {
 
   win.on('unmaximize', (event) => {
     onWindowResize(null, null, win);
+  });
+
+  win.on('will-quit', (event) => {
+    globalShortcut.unregisterAll();
   });
   
   initIPC(win);

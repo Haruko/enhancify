@@ -26,11 +26,16 @@ export default {
   }),
 
   mounted() {
-    ipcRenderer.on('window-resize', (event, width, height, maximized) => {
+    ipcRenderer.off('window-resize', this.resizeWindow);
+    ipcRenderer.on('window-resize', this.resizeWindow);
+  },
+  
+  methods: {
+    resizeWindow(event, width, height, maximized) {
       this.windowHeight = height;
       this.windowWidth = width;
       this.windowMaximized = maximized;
-    });
+    },
   },
 };
 </script>

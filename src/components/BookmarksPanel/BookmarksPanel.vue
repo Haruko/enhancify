@@ -2,10 +2,12 @@
   <VRow no-gutters class="panel">
     <VCol>
       <VRow no-gutters align="center">
-        <VCol>
-          ||Hotkey Stuff Here||
-          ||Hotkey Stuff Here||
-          ||Hotkey Stuff Here||
+        <VCol cols="6">
+          <VTextField :value="hotkey" label="Hotkey" class="mr-3" dense disabled></VTextField>
+        </VCol>
+        <VCol cols="6">
+          <VBtn v-if="!recordingHotkey" color="primary" small @click.native="startRecordingHotkeys">Edit</VBtn>
+          <VBtn v-if="recordingHotkey" color="error" small @click.native="stopRecordingHotkeys">Stop</VBtn>
         </VCol>
       </VRow>
       <VRow no-gutters align="center">
@@ -51,6 +53,12 @@ import { ipcRenderer } from 'electron';
 export default {
   name: 'BookmarksPanel',
 
+  data() {
+    return {
+      recordingHotkey: false,
+    };
+  },
+
   computed: {
     saveBookmarksLocal: {
       get() {
@@ -91,14 +99,58 @@ export default {
         await this.$store.dispatch('changeConfigProp', { prop: 'allowDupesSpotify', value });
       },
     },
+
+    hotkey: {
+      get() {
+        return this.$store.state.config.hotkey;
+      },
+
+      set() {
+
+      },
+    },
+  },
+
+  mounted() {
+    // When pressing hotkey
+    ipcRenderer.off('hotkey-pressed', this.hotkeyPressed);
+    ipcRenderer.on('hotkey-pressed', this.hotkeyPressed);
+
+    // When registering new hotkey
+    ipcRenderer.off('register-hotkey-captured', this.hotkeyRegistered);
+    ipcRenderer.on('register-hotkey-captured', this.hotkeyRegistered);
   },
 
   methods: {
     openBookmarksFile() {
       ipcRenderer.send('open-file', 'bookmarks');
     },
+
     openBookmarksDir() {
       ipcRenderer.send('open-directory', 'bookmarks');
+    },
+
+    startRecordingHotkeys() {
+      this.recordingHotkey = true;
+      ipcRenderer.send('register-hotkey-start');
+    },
+
+    stopRecordingHotkeys() {
+      ipcRenderer.send('register-hotkey-stop');
+      this.recordingHotkey = false;
+    },
+
+    async hotkeyPressed() {
+      if (this.saveBookmarksLocal || this.saveBookmarksSpotify) {
+        await this.$store.dispatch('bookmarkNowPlaying');
+      }
+    },
+
+    async hotkeyRegistered(event, hotkeyString) {
+      await this.$store.dispatch('changeConfigProp', { prop: 'hotkey', value: hotkeyString });
+
+      // Event is already unregistered in ipc.js
+      this.recordingHotkey = false;
     },
   },
 }
