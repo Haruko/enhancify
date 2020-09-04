@@ -24,8 +24,11 @@ function formatTimeMS(ms) {
 export default {
   state: {
     nowPlayingData: null,
+    interpolatedProgress: 0,
+    previousAlbumArt: undefined,
 
     updateTimeoutID: undefined,
+    secondsTimeoutID: undefined,
   },
 
   mutations: {
@@ -33,9 +36,9 @@ export default {
       state[prop] = value;
     },
 
-    CLEAR_UPDATE_TIMEOUT(state) {
-      clearTimeout(state.updateTimeoutID);
-      state.updateTimeoutID = undefined;
+    CLEAR_TIMEOUT(state, timeoutName) {
+      clearTimeout(state[timeoutName]);
+      state[timeoutName] = undefined;
     },
   },
 
@@ -60,7 +63,7 @@ export default {
     },
 
     // Set a timer for the next API request
-    async startUpdateTimeout({ rootState, state, commit, dispatch }) {
+    async startNowPlayingTimeouts({ rootState, state, commit, dispatch }) {
       let timeoutLength;
 
       if (state.nowPlayingData !== null && state.nowPlayingData.is_playing) {
@@ -76,26 +79,56 @@ export default {
       const timeoutID = setTimeout(async () => {
         await dispatch('getNowPlayingData');
         await dispatch('writeOutputFiles');
-        await dispatch('startUpdateTimeout');
+        await dispatch('startNowPlayingTimeouts');
       }, timeoutLength);
 
       commit('SET_AUTH_PROP', { prop: 'updateTimeoutID', value: timeoutID });
+
+      // Subtract 1 second because Spotify's API seems to be ahead, probably due to buffering
+      commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: state.nowPlayingData.progress_ms - 1000 });
+      await dispatch('startSecondsTimeout', timeoutLength);
     },
 
-    async stopUpdateTimeout({ commit }) {
-      commit('CLEAR_UPDATE_TIMEOUT');
+    async startSecondsTimeout({ state, commit, dispatch }, length) {
+      if (length < 1000) {
+        return;
+      }
+
+      const timeoutID = setTimeout(async () => {
+        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: state.interpolatedProgress + 1000 });
+        await dispatch('writeOutputFiles', true);
+        await dispatch('startSecondsTimeout', length - 1000);
+      }, 1000);
+
+      commit('SET_AUTH_PROP', { prop: 'secondsTimeoutID', value: timeoutID });
     },
 
-    async mapFileFormats({ rootState, getters }) {
+    async stopNowPlayingTimeouts({ commit }) {
+      commit('CLEAR_TIMEOUT', 'updateTimeoutID');
+      commit('CLEAR_TIMEOUT', 'secondsTimeoutID');
+    },
+
+    // Set progressOnly to true to only process file formats that include <<progress>
+    async mapFileFormats({ rootState, getters }, progressOnly = false) {
       // Build mapping of regexs
+      // Need all even if updated due to progress change
       const regexFunctions = Object.keys(getters.nowPlayingFormatted).map((key) => {
         return (str) =>
-          str.replace(new RegExp(config.labels.startTag + key + config.labels.endTag, 'gi'), getters.nowPlayingFormatted[key]);
+          str.replace(new RegExp(config.labels.startTag + key + config.labels.endTag, 'gi'),
+            getters.nowPlayingFormatted[key]);
       });
+
 
       const fileFormats = [];
 
-      rootState.config.fileFormats.forEach((file) => {
+      let processedFiles = rootState.config.fileFormats;
+
+      if (progressOnly) {
+        const progressRegex = new RegExp(config.labels.startTag + 'progress' + config.labels.endTag, 'gi');
+        processedFiles = processedFiles.filter((file) => progressRegex.test(file.format));
+      }
+
+      processedFiles.forEach((file) => {
         let formattedString = file.format;
         regexFunctions.forEach((regex) => {
           formattedString = regex(formattedString);
@@ -110,18 +143,24 @@ export default {
       return fileFormats;
     },
 
-    async writeOutputFiles({ state, dispatch }) {
-      const fileFormats = await dispatch('mapFileFormats');
+    // Set progressOnly to true to only process file formats that include <<progress>
+    async writeOutputFiles({ state, commit, dispatch }, progressOnly = false) {
+      const fileFormats = await dispatch('mapFileFormats', progressOnly);
 
       for (const file of fileFormats) {
         await ipcRenderer.invoke('write-file', 'output', file.data, file.filename);
       }
 
       // Album art
-      const albumArt = state.nowPlayingData.item.album.images;
-      if (typeof albumArt === 'object' && albumArt.length > 0) {
-        const url = albumArt[0].url;
-        await ipcRenderer.invoke('download-file', url, 'album');
+      if (!progressOnly) {
+        const albumArt = state.nowPlayingData.item.album.images;
+        if (typeof albumArt === 'object' && albumArt.length > 0) {
+          const url = albumArt[0].url;
+          if (url !== state.previousAlbumArt) {
+            commit('SET_AUTH_PROP', { prop: 'previousAlbumArt', value: url });
+            await ipcRenderer.invoke('download-file', url, 'album');
+          }
+        }
       }
     },
   },
@@ -170,7 +209,8 @@ export default {
 
     nowPlayingProgress(state, getters) {
       if (state.nowPlayingData !== null && getters.nowPlayingType === 'track') {
-        return formatTimeMS(state.nowPlayingData.progress_ms);
+        // return formatTimeMS(state.nowPlayingData.progress_ms);
+        return formatTimeMS(state.interpolatedProgress);
       } else {
         return '??:??';
       }

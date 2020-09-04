@@ -11,10 +11,10 @@ export default {
     // Editable by user in frontend
     fileFormats: [{
       filename: 'trackinfo.txt',
-      format: '[{ARTIST}] - [{TITLE}]',
+      format: '<<artist>> - <<title>>',
     }, {
       filename: 'progress.txt',
-      format: '[{PROGRESS}] / [{LENGTH}]',
+      format: '<<progress>> / <<length>>',
     }],
 
     // Editable by user in frontend
