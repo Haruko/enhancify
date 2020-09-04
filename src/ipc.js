@@ -124,7 +124,6 @@ const keycodeMappings = {
   Slash: '/',
 };
 
-
 export function initIPC(win) {
   // Window controls
   ipcMain.on('minimize-window', (event) => {
@@ -181,6 +180,31 @@ export function initIPC(win) {
     console.log('download', url);
 
     await download(url, getFileBasePath(type), { filename: filename });
+  });
+
+  ipcMain.on('bookmark-song', async (event, data, allowDuplicates = true) => {
+    const filePath = path.join(getFileBasePath('bookmarks'), getFileName('bookmarks'));
+    console.log('bookmark', allowDuplicates, filePath);
+
+    let shouldWrite = true;
+
+    if (!allowDuplicates) {
+      const fileExists = await fs.pathExists(filePath);
+      if (fileExists) {
+        // Read in bookmarks file and check if it exists
+        const existingBookmarks = await fs.readFile(filePath, { encoding: 'utf8' });
+        
+        const existingBookmarksList = (existingBookmarks || '').split('\n');
+        
+        const exists = existingBookmarksList.findIndex((track) => track === data) !== -1;
+        shouldWrite = !exists;
+      }
+    }
+
+    if (shouldWrite) {
+      await fs.ensureFile(filePath);
+      await fs.writeFile(filePath, data + '\n', { flag: 'a' });
+    }
   });
 
   ipcMain.on('open-directory', async (event, type) => {

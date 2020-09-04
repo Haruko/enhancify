@@ -163,9 +163,27 @@ export default {
         }
       }
     },
-    
-    async bookmarkNowPlaying() {
-      console.log('Bookmark!');
+
+    async bookmarkNowPlaying({ state, rootState }) {
+      if (state.nowPlayingData === null || state.nowPlayingData === '') {
+        return;
+      }
+
+      // Local
+      if (rootState.config.saveBookmarksLocal) {
+        // track, artist, uri
+        const artists = state.nowPlayingData.item.artists.map((artist) => artist.name).join(', ');
+        const track = state.nowPlayingData.item.name;
+        const uri = state.nowPlayingData.item.external_urls.spotify;
+        const bookmarkText = `"${artists.replace(/"/g, '""')}","${track.replace(/"/g, '""')}","${uri.replace(/"/g, '""')}"`;
+
+        ipcRenderer.send('bookmark-song', bookmarkText, rootState.config.allowDupesLocal)
+      }
+
+      // Spotify playlist
+      if (rootState.config.saveBookmarksSpotify) {
+        // allowDupesSpotify
+      }
     },
   },
 
