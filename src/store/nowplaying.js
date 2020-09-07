@@ -50,6 +50,12 @@ export default {
         const response = await axios.get('https://api.spotify.com/v1/me/player', { headers: rootGetters.authHeader, });
 
         responseData = response.data;
+
+        if (typeof responseData === 'object' && responseData !== null) {
+          commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: responseData });
+        } else {
+          commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: null });
+        }
       } catch (error) {
         responseData = null;
 
@@ -59,17 +65,14 @@ export default {
           if (rootState.auth.refresh_token === null) {
             // Unauthorized and have no saved refresh token
             await dispatch('deAuth');
-            return;
           } else {
             await dispatch('requestAccessToken');
 
             if (typeof rootState.auth.access_token !== 'undefined') {
               await dispatch('getNowPlayingData');
-              return;
             } else {
               // Unauthorized and refresh token didn't work
               await dispatch('deAuth');
-              return;
             }
           }
         } else {
@@ -77,11 +80,7 @@ export default {
         }
       }
 
-      if (typeof responseData === 'object' && responseData !== null) {
-        commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: responseData });
-      } else {
-        commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: null });
-      }
+
     },
 
     // Set a timer for the next API request
