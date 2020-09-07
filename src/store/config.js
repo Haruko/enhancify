@@ -58,7 +58,7 @@ export default {
   },
 
   actions: {
-    async loadConfig({ state, commit, dispatch }) {
+    async loadConfig({ commit, dispatch }) {
       // Try to read file
       let config = await ipcRenderer.invoke('read-file', 'config');
 
@@ -76,8 +76,6 @@ export default {
         // No config file found
         await dispatch('storeConfig');
       }
-      
-      await ipcRenderer.send('load-hotkey', state.hotkey);
     },
 
     async storeConfig({ state }) {

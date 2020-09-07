@@ -237,19 +237,39 @@ export function initIPC(win) {
 
 
   // Hotkeys
-  ipcMain.on('register-hotkey-start', async (event) => {
+  /*
+    <Process>:
+      <Action> (<sender>): <channel>
+    
+    To capture new hotkey: 
+      Start (renderer): new-hotkey-start
+      Stop (renderer): new-hotkey-stop
+      After captured (main): new-hotkey-captured
+    
+    To register hotkey when starting usage:
+      Register (renderer): register-hotkey
+      Unregister (renderer): unregister-hotkey
+    
+    To react to hotkey event:
+      On press (main): hotkey-pressed
+  */
+  ipcMain.on('new-hotkey-start', async (event) => {
     event.sender.on('before-input-event', handleInputEvent);
   });
 
-  ipcMain.on('register-hotkey-stop', async (event) => {
+  ipcMain.on('new-hotkey-stop', async (event) => {
     event.sender.off('before-input-event', handleInputEvent);
   });
 
-  ipcMain.on('load-hotkey', async (event, hotkey) => {
+  ipcMain.on('register-hotkey', async (event, hotkey) => {
     globalShortcut.unregisterAll();
     globalShortcut.register(hotkey, () => {
       event.sender.send('hotkey-pressed');
     });
+  });
+
+  ipcMain.on('unregister-hotkey', async (event, hotkey) => {
+    globalShortcut.unregisterAll();
   });
 }
 
@@ -284,12 +304,7 @@ function handleInputEvent(event, input) {
   acceleratorKeys.push(keycodeMappings[input.code]);
   const acceleratorString = acceleratorKeys.join('+');
 
-  globalShortcut.unregisterAll();
-  globalShortcut.register(acceleratorString, () => {
-    event.sender.send('hotkey-pressed');
-  });
-
-  event.sender.send('register-hotkey-captured', acceleratorString);
+  event.sender.send('new-hotkey-captured', acceleratorString);
   event.sender.off('before-input-event', handleInputEvent);
 }
 
