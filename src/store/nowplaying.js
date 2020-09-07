@@ -105,6 +105,7 @@ export default {
       const timeoutID = setTimeout(async () => {
         await dispatch('getNowPlayingData');
         await dispatch('writeOutputFiles');
+        await dispatch('stopNowPlayingTimeouts');
         await dispatch('startNowPlayingTimeouts');
       }, timeoutLength);
 
@@ -197,6 +198,7 @@ export default {
 
       if (allowBookmark && (rootState.config.saveBookmarksLocal || rootState.config.saveBookmarksSpotify)) {
         await dispatch('getNowPlayingData');
+        await dispatch('writeOutputFiles');
         await dispatch('stopNowPlayingTimeouts');
         await dispatch('startNowPlayingTimeouts');
 
