@@ -10,6 +10,9 @@ Vue.config.productionTip = false
 
 store.dispatch('loadConfig')
   .then(() => {
+    window.removeEventListener('message', handleHotReload);
+    window.addEventListener('message', handleHotReload);
+
     new Vue({
       router,
       store,
@@ -17,3 +20,22 @@ store.dispatch('loadConfig')
       render: h => h(App)
     }).$mount('#app')
   });
+
+async function handleHotReload(event) {
+  if (event.data && typeof event.data === 'string' && /webpackHotUpdate/.test(event.data)) {
+    console.log('Hot Reload');
+
+    if (typeof store.state.auth.refresh_token === 'undefined') {
+      const exists = await store.dispatch('loadRefreshToken');
+      if (exists) {
+        try {
+          await store.dispatch('requestAccessToken'); 
+        } catch (error) {
+          router.push('/');
+        }
+      } else {
+        router.push('/');
+      }
+    }
+  }
+}

@@ -12,46 +12,68 @@ const routes = [{
   name: 'Unauthorized',
   component: Unauthorized,
 
-  beforeEnter(to, from, next) {
+  async beforeEnter(to, from, next) {
     // Clear auth localStorage data
-    store.dispatch('clearLocalStorage')
-      // Check for refresh token file
-      .then(() => store.dispatch('loadRefreshToken'))
-      .then((existed) => {
-        if (existed) {
-          return store.dispatch('requestAccessToken')
-            .then(() => next('/authorized'))
-            .catch(() => next());
-        } else {
-          next();
-        }
-      });
+    await store.dispatch('clearLocalStorage');
+
+    // Check for refresh token file
+    const exists = await store.dispatch('loadRefreshToken');
+    if (exists) {
+      try {
+        await store.dispatch('requestAccessToken');
+        next('/authorized');
+      } catch (error) {
+        next();
+      }
+    } else {
+      next();
+    }
   },
 }, {
   path: '/cb',
   name: 'Callback',
 
-  beforeEnter(to, from, next) {
+  async beforeEnter(to, from, next) {
     const authError = to.query.error;
     const authState = to.query.state;
     const authCode = to.query.code;
 
     // Load auth localStorage data
-    store.dispatch('loadFromLocalStorage')
-      .then(() => {
-        if (authError || store.state.auth.state !== authState) {
-          next('/');
-        } else {
-          store.dispatch('requestAccessToken', authCode)
-            .then(() => next('/authorized'))
-            .catch(() => next('/'));
-        }
-      });
+    await store.dispatch('loadFromLocalStorage');
+
+    if (authError || store.state.auth.state !== authState) {
+      next('/');
+    } else {
+      try {
+        await store.dispatch('requestAccessToken', authCode);
+        next('/authorized');
+      } catch (error) {
+        next('/');
+      }
+    }
   },
 }, {
   path: '/authorized',
   name: 'Authorized',
   component: Authorized,
+
+  async beforeEnter(to, from, next) {
+    // Check for refresh token file
+    const exists = await store.dispatch('loadRefreshToken');
+    if (exists) {
+      try {
+        if (typeof store.state.auth.access_token === 'undefined') {
+          await store.dispatch('requestAccessToken');
+        }
+        
+        next();
+      } catch (error) {
+        next('/');
+      }
+    } else {
+      next('/');
+    }
+  },
 }, ]
 
 const router = new VueRouter({
