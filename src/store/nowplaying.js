@@ -29,6 +29,9 @@ export default {
 
     updateTimeoutID: undefined,
     secondsTimeoutID: undefined,
+
+    lastBookmarked: null,
+    bookmarkCooldown: 1000,
   },
 
   mutations: {
@@ -79,8 +82,6 @@ export default {
           console.log(error);
         }
       }
-
-
     },
 
     // Set a timer for the next API request
@@ -185,25 +186,39 @@ export default {
       }
     },
 
-    async bookmarkNowPlaying({ state, rootState }) {
+    async bookmarkNowPlaying({ state, rootState, commit, getters }) {
       if (state.nowPlayingData === null) {
         return;
       }
 
-      // Local
-      if (rootState.config.saveBookmarksLocal) {
-        // track, artist, uri
-        const artists = state.nowPlayingData.item.artists.map((artist) => artist.name).join(', ');
-        const track = state.nowPlayingData.item.name;
-        const uri = state.nowPlayingData.item.external_urls.spotify;
-        const bookmarkText = `"${artists.replace(/"/g, '""')}","${track.replace(/"/g, '""')}","${uri.replace(/"/g, '""')}"`;
+      // Check for bookmark cooldown
+      const now = Date.now();
+      const allowBookmark = state.allowBookmark === null || now - state.lastBookmarked > state.bookmarkCooldown;
 
-        ipcRenderer.send('bookmark-song', bookmarkText, rootState.config.allowDupesLocal)
-      }
+      if (allowBookmark) {
+        let didBookmark = false;
 
-      // Spotify playlist
-      if (rootState.config.saveBookmarksSpotify) {
-        // allowDupesSpotify
+        // Local
+        if (rootState.config.saveBookmarksLocal) {
+          // track, artist, uri
+          const artists = getters.nowPlayingArtist;
+          const track = getters.nowPlayingTitle;
+          const uri = state.nowPlayingData.item.external_urls.spotify;
+          const bookmarkText = `"${artists.replace(/"/g, '""')}","${track.replace(/"/g, '""')}","${uri.replace(/"/g, '""')}"`;
+
+          ipcRenderer.send('bookmark-song', bookmarkText, rootState.config.allowDupesLocal);
+          didBookmark = true;
+        }
+
+        // Spotify playlist
+        if (rootState.config.saveBookmarksSpotify) {
+          // allowDupesSpotify
+          // didBookmark = true;
+        }
+
+        if (didBookmark) {
+          commit('SET_AUTH_PROP', { prop: 'lastBookmarked', value: now });
+        }
       }
     },
   },
