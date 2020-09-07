@@ -186,7 +186,7 @@ export default {
       }
     },
 
-    async bookmarkNowPlaying({ state, rootState, commit, getters }) {
+    async bookmarkNowPlaying({ state, rootState, getters, commit, dispatch }) {
       if (state.nowPlayingData === null) {
         return;
       }
@@ -195,7 +195,11 @@ export default {
       const now = Date.now();
       const allowBookmark = state.allowBookmark === null || now - state.lastBookmarked > state.bookmarkCooldown;
 
-      if (allowBookmark) {
+      if (allowBookmark && (rootState.config.saveBookmarksLocal || rootState.config.saveBookmarksSpotify)) {
+        await dispatch('getNowPlayingData');
+        await dispatch('stopNowPlayingTimeouts');
+        await dispatch('startNowPlayingTimeouts');
+
         let didBookmark = false;
 
         // Local
