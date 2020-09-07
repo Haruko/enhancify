@@ -15,7 +15,7 @@ export default {
       allowLoadRefreshToken: true,
     };
   },
-  
+
   computed: {
     refreshToken() {
       return this.$store.state.auth.refresh_token;
@@ -35,7 +35,12 @@ export default {
 
     async reloadRefreshToken() {
       this.allowLoadRefreshToken = false;
-      await this.$store.dispatch('loadRefreshToken');
+      const existed = await this.$store.dispatch('loadRefreshToken');
+
+      if (existed) {
+        await this.$store.dispatch('requestAccessToken');
+      }
+
       this.allowLoadRefreshToken = true;
     },
   },

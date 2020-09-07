@@ -39,7 +39,6 @@ export default {
 
     async deAuth() {
       await this.$store.dispatch('deAuth');
-      this.$router.push('/');
     },
   },
 }

@@ -44,15 +44,37 @@ export default {
 
   actions: {
     // Get data from API
-    async getNowPlayingData({ rootGetters, commit }) {
+    async getNowPlayingData({ rootState, rootGetters, commit, dispatch }) {
       let responseData;
       try {
         const response = await axios.get('https://api.spotify.com/v1/me/player', { headers: rootGetters.authHeader, });
 
         responseData = response.data;
       } catch (error) {
-        console.log(error);
         responseData = null;
+
+        if (error.response.status === 400) {
+          await dispatch('loadRefreshToken');
+
+          if (rootState.auth.refresh_token === null) {
+            // Unauthorized and have no saved refresh token
+            await dispatch('deAuth');
+            return;
+          } else {
+            await dispatch('requestAccessToken');
+
+            if (typeof rootState.auth.access_token !== 'undefined') {
+              await dispatch('getNowPlayingData');
+              return;
+            } else {
+              // Unauthorized and refresh token didn't work
+              await dispatch('deAuth');
+              return;
+            }
+          }
+        } else {
+          console.log(error);
+        }
       }
 
       if (typeof responseData === 'object' && responseData !== null) {
@@ -72,6 +94,10 @@ export default {
           state.nowPlayingData.progress_ms;
 
         timeoutLength = Math.min(calculated + 1000, config.api.maxRequestInterval);
+
+        // Subtract 1 second because Spotify's API seems to be ahead, probably due to buffering
+        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: state.nowPlayingData.progress_ms - 1000 });
+        await dispatch('startSecondsTimeout', timeoutLength);
       } else {
         timeoutLength = config.api.maxRequestInterval;
       }
@@ -83,10 +109,6 @@ export default {
       }, timeoutLength);
 
       commit('SET_AUTH_PROP', { prop: 'updateTimeoutID', value: timeoutID });
-
-      // Subtract 1 second because Spotify's API seems to be ahead, probably due to buffering
-      commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: state.nowPlayingData.progress_ms - 1000 });
-      await dispatch('startSecondsTimeout', timeoutLength);
     },
 
     async startSecondsTimeout({ state, commit, dispatch }, length) {
@@ -152,7 +174,7 @@ export default {
       }
 
       // Album art
-      if (!progressOnly) {
+      if (!progressOnly && state.nowPlayingData !== null) {
         const albumArt = state.nowPlayingData.item.album.images;
         if (typeof albumArt === 'object' && albumArt.length > 0) {
           const url = albumArt[0].url;
@@ -165,7 +187,7 @@ export default {
     },
 
     async bookmarkNowPlaying({ state, rootState }) {
-      if (state.nowPlayingData === null || state.nowPlayingData === '') {
+      if (state.nowPlayingData === null) {
         return;
       }
 

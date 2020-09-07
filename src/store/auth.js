@@ -137,12 +137,11 @@ export default {
     },
 
     // Load refresh token from file
-    async loadRefreshToken({ commit, dispatch }) {
+    async loadRefreshToken({ commit }) {
       let token = await ipcRenderer.invoke('read-file', 'token');
 
       if (token !== null) {
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: token });
-        await dispatch('requestAccessToken');
         return true;
       } else {
         return false;
@@ -167,6 +166,7 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 })
 
       await ipcRenderer.invoke('delete-file', 'token');
+      router.push('/');
     },
   },
 
