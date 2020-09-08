@@ -28,13 +28,16 @@ export default {
     allowDupesLocal: false,
     saveBookmarksSpotify: false,
     allowDupesSpotify: false,
+    spotifyPlaylist: 'Enhancify Bookmarks',
   },
 
   mutations: {
     SET_CONFIG(state, configData) {
       Object.keys(state)
         .forEach(key => {
-          state[key] = configData[key];
+          if (typeof configData[key] !== 'undefined') {
+            state[key] = configData[key];
+          }
         });
     },
 
