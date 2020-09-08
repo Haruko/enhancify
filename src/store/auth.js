@@ -171,7 +171,7 @@ export default {
     },
 
     // Force removal of auth
-    async deAuth({ state, commit }) {
+    async deAuth({ state, commit, dispatch }) {
       commit('SET_AUTH_PROP', { prop: 'state', value: pkce.createChallenge() });
       commit('SET_AUTH_PROP', { prop: 'codePair', value: pkce.create() });
       commit('SET_AUTH_PROP', { prop: 'access_token', value: undefined });
@@ -181,7 +181,9 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'user_id', value: undefined });
       clearTimeout(state.refreshTokenTimeoutID);
       commit('SET_AUTH_PROP', { prop: 'refreshTokenTimeoutID', value: undefined });
-      commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 })
+      commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 });
+      
+      await dispatch('stopNowPlayingTimeouts');
 
       await ipcRenderer.invoke('delete-file', 'token');
       router.push('/');
