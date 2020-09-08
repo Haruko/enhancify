@@ -219,7 +219,7 @@ export default {
 
         // Spotify playlist
         if (rootState.config.saveBookmarksSpotify) {
-          // const uri = state.nowPlayingData.item.external_urls.spotify;
+          const uri = state.nowPlayingData.item.uri;
 
           // allowDupesSpotify
           // didBookmark = true;
@@ -240,13 +240,19 @@ export default {
                 description: 'All of your Enhancify bookmarks!',
               };
 
-              const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`, playlistData, { headers: rootGetters.authHeader, });
+              const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`,
+                playlistData, { headers: rootGetters.authHeader, });
               commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
+            } else {
+              commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: playlist.id });
             }
           }
 
           // Add song to playlist
+          /*const addResponse = */
+          await axios.post(`https://api.spotify.com/v1/playlists/${state.bookmarkPlaylistID}/tracks`, { uris: [uri], }, { headers: rootGetters.authHeader, });
 
+          didBookmark = true;
         }
 
         if (didBookmark) {
@@ -271,7 +277,7 @@ export default {
       } while (nextUrl !== null && typeof playlist === 'undefined');
 
       if (typeof playlist !== 'undefined') {
-        return playlist.id;
+        return playlist;
       } else {
         return undefined;
       }
