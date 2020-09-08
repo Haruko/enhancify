@@ -219,11 +219,6 @@ export default {
 
         // Spotify playlist
         if (rootState.config.saveBookmarksSpotify) {
-          const uri = state.nowPlayingData.item.uri;
-
-          // allowDupesSpotify
-          // didBookmark = true;
-
           if (typeof state.bookmarkPlaylistID === 'undefined') {
             // Check if playlist exists
             const playlist = await dispatch('findEnhancifyPlaylist');
@@ -241,17 +236,33 @@ export default {
               };
 
               const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`,
-                playlistData, { headers: rootGetters.authHeader, });
+                playlistData, {
+                  headers: rootGetters.authHeader,
+                });
               commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
             } else {
               commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: playlist.id });
             }
           }
 
-          // Add song to playlist
-          /*const addResponse = */
-          await axios.post(`https://api.spotify.com/v1/playlists/${state.bookmarkPlaylistID}/tracks`, { uris: [uri], }, { headers: rootGetters.authHeader, });
+          let shouldWrite = true;
 
+          // Check for duplicate
+          if (!rootState.config.allowDupesSpotify) {
+            const track = await dispatch('findTrackInPlaylist', { playlistId: state.bookmarkPlaylistID, trackId: state.nowPlayingData.item.id });
+            shouldWrite = !track;
+          }
+
+          // Add song to playlist
+          if (shouldWrite) {
+            await axios.post(`https://api.spotify.com/v1/playlists/${state.bookmarkPlaylistID}/tracks`, {
+              uris: [state.nowPlayingData.item.uri],
+            }, {
+              headers: rootGetters.authHeader,
+            });
+          }
+          
+          // Set this to true even if we didn't bookmark it so that it can't be spammed
           didBookmark = true;
         }
 
@@ -278,6 +289,28 @@ export default {
 
       if (typeof playlist !== 'undefined') {
         return playlist;
+      } else {
+        return undefined;
+      }
+    },
+
+    async findTrackInPlaylist({ rootGetters }, { playlistId, trackId }) {
+      const limit = 100; // Max limit possible
+      let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=0&limit=${limit}`;
+
+      let foundTrack;
+
+      do {
+        const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
+
+        // Check if it exists
+        foundTrack = response.data.items.find(t => t.track.id === trackId);
+
+        nextUrl = response.data.next;
+      } while (nextUrl !== null && typeof foundTrack === 'undefined');
+
+      if (typeof foundTrack !== 'undefined') {
+        return foundTrack;
       } else {
         return undefined;
       }
