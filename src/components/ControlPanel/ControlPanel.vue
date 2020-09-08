@@ -7,6 +7,7 @@
     </VCol>
     <VCol>
       <VRow no-gutters justify="end">
+        <VBtn v-if="canBookmark" color="info" small @click.native="bookmark">Bookmark</VBtn>
         <VBtn :color="running ? 'error': 'primary'" small @click.native="startStop">{{ running ? 'Stop' : 'Start' }}</VBtn>
       </VRow>
     </VCol>
@@ -22,6 +23,13 @@ export default {
     running() {
       return !!this.$store.state.nowplaying.updateTimeoutID;
     },
+
+    canBookmark() {
+      return this.running && (
+        this.$store.state.config.saveBookmarksLocal ||
+        this.$store.state.config.saveBookmarksSpotify
+      );
+    },
   },
 
   methods: {
@@ -35,6 +43,10 @@ export default {
         await this.$store.dispatch('startNowPlayingTimeouts');
         ipcRenderer.send('register-hotkey', this.$store.state.config.hotkey);
       }
+    },
+
+    async bookmark() {
+      await this.$store.dispatch('bookmarkNowPlaying');
     },
 
     async deAuth() {
