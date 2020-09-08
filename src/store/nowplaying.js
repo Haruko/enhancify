@@ -96,8 +96,9 @@ export default {
         timeoutLength = Math.min(calculated + 1000, config.api.maxRequestInterval);
 
         // Subtract 1 second because Spotify's API seems to be ahead, probably due to buffering
-        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: state.nowPlayingData.progress_ms - 1000 });
-        await dispatch('startSecondsTimeout', timeoutLength);
+        const progress = state.nowPlayingData.progress_ms - 1000;
+        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: progress });
+        await dispatch('startSecondsTimeout', { length: timeoutLength, progress: progress });
       } else {
         timeoutLength = config.api.maxRequestInterval;
       }
@@ -112,16 +113,17 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'updateTimeoutID', value: timeoutID });
     },
 
-    async startSecondsTimeout({ state, commit, dispatch }, length) {
+    async startSecondsTimeout({ commit, dispatch }, { length, progress }) {
       if (length < 1000) {
         return;
       }
 
-      const timeoutID = setTimeout(async () => {
-        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: state.interpolatedProgress + 1000 });
+      const timeoutID = setTimeout(async (currentProgress) => {
+        currentProgress += 1000;
+        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: currentProgress });
         await dispatch('writeOutputFiles', true);
-        await dispatch('startSecondsTimeout', length - 1000);
-      }, 1000);
+        await dispatch('startSecondsTimeout', { length: length - 1000, progress: currentProgress });
+      }, 1000, progress);
 
       commit('SET_AUTH_PROP', { prop: 'secondsTimeoutID', value: timeoutID });
     },
