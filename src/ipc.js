@@ -147,7 +147,6 @@ export function initIPC(win) {
   // Files
   ipcMain.handle('read-file', async (event, type, filename) => {
     const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
-    console.log('read', filePath);
 
     const exists = await fs.pathExists(filePath);
     if (exists) {
@@ -159,7 +158,6 @@ export function initIPC(win) {
 
   ipcMain.handle('write-file', async (event, type, data, filename) => {
     const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
-    console.log('write', filePath);
 
     await fs.ensureFile(filePath);
     await fs.writeFile(filePath, data, { flag: 'w' });
@@ -167,7 +165,6 @@ export function initIPC(win) {
 
   ipcMain.handle('delete-file', async (event, type, filename) => {
     const filePath = path.join(getFileBasePath(type), typeof filename !== 'undefined' ? filename : getFileName(type));
-    console.log('delete', filePath);
 
     await fs.remove(filePath);
   });
@@ -177,14 +174,11 @@ export function initIPC(win) {
       filename = getFileName(type);
     }
 
-    console.log('download', url);
-
     await download(url, getFileBasePath(type), { filename: filename });
   });
 
   ipcMain.on('bookmark-song', async (event, data, allowDuplicates = true) => {
     const filePath = path.join(getFileBasePath('bookmarks'), getFileName('bookmarks'));
-    console.log('bookmark', allowDuplicates, filePath);
 
     let shouldWrite = true;
 
