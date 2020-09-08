@@ -30,8 +30,8 @@ export default {
     updateTimeoutID: undefined,
     secondsTimeoutID: undefined,
 
-    lastBookmarked: undefined,
     bookmarkCooldown: 1000,
+    lastBookmarked: undefined,
     bookmarkPlaylistID: undefined,
   },
 
@@ -224,27 +224,29 @@ export default {
           // allowDupesSpotify
           // didBookmark = true;
 
-          // Check if playlist exists
-          const playlist = await dispatch('findEnhancifyPlaylist');
-          if (typeof playlist === 'undefined') {
-            // Create it
+          if (typeof state.bookmarkPlaylistID === 'undefined') {
+            // Check if playlist exists
+            const playlist = await dispatch('findEnhancifyPlaylist');
+            if (typeof playlist === 'undefined') {
+              // Create it
 
-            if (typeof rootState.auth.user_id === 'undefined' || typeof rootState.auth.user_id === 'undefined') {
-              await dispatch('getUserId');
+              if (typeof rootState.auth.user_id === 'undefined' || typeof rootState.auth.user_id === 'undefined') {
+                await dispatch('getUserId');
+              }
+
+              const playlistData = {
+                name: rootState.config.spotifyPlaylist,
+                public: false,
+                description: 'All of your Enhancify bookmarks!',
+              };
+
+              const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`, playlistData, { headers: rootGetters.authHeader, });
+              commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
             }
-
-            const playlistData = {
-              name: rootState.config.spotifyPlaylist,
-              public: false,
-              description: 'All of your Enhancify bookmarks!',
-            };
-
-            const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`, playlistData, { headers: rootGetters.authHeader, });
-            commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
           }
 
           // Add song to playlist
-          
+
         }
 
         if (didBookmark) {
@@ -274,6 +276,16 @@ export default {
         return undefined;
       }
     },
+
+    async deAuthNowPlaying({ commit, dispatch }) {
+      commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: 0 });
+      commit('SET_AUTH_PROP', { prop: 'previousAlbumArt', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'lastBookmarked', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: undefined });
+
+      await dispatch('stopNowPlayingTimeouts');
+    }
   },
 
   getters: {

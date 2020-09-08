@@ -113,11 +113,11 @@ export default {
         return false;
       }
     },
-    
+
     // Get the user ID after getting access token
     async getUserId({ getters, commit }) {
       const response = await axios.get('https://api.spotify.com/v1/me', { headers: getters.authHeader, });
-      
+
       if (response.status === 200) {
         commit('SET_AUTH_PROP', { prop: 'user_id', value: response.data.id });
       } else {
@@ -182,8 +182,8 @@ export default {
       clearTimeout(state.refreshTokenTimeoutID);
       commit('SET_AUTH_PROP', { prop: 'refreshTokenTimeoutID', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 });
-      
-      await dispatch('stopNowPlayingTimeouts');
+
+      await dispatch('deAuthNowPlaying');
 
       await ipcRenderer.invoke('delete-file', 'token');
       router.push('/');
