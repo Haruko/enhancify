@@ -32,6 +32,7 @@ export default {
 
     lastBookmarked: null,
     bookmarkCooldown: 1000,
+    bookmarkPlaylistID: undefined,
   },
 
   mutations: {
@@ -189,7 +190,7 @@ export default {
       }
     },
 
-    async bookmarkNowPlaying({ state, rootState, getters, commit, dispatch }) {
+    async bookmarkNowPlaying({ state, rootState, getters, rootGetters, commit, dispatch }) {
       if (state.nowPlayingData === null) {
         return;
       }
@@ -220,13 +221,59 @@ export default {
 
         // Spotify playlist
         if (rootState.config.saveBookmarksSpotify) {
+          // const uri = state.nowPlayingData.item.external_urls.spotify;
+
           // allowDupesSpotify
           // didBookmark = true;
+
+          // Check if playlist exists
+          const playlist = await dispatch('findEnhancifyPlaylist');
+          if (playlist === null) {
+            // Create it
+
+            if (typeof rootState.auth.user_id === 'undefined' || rootState.auth.user_id === null) {
+              await dispatch('getUserId');
+            }
+
+            const playlistData = {
+              name: rootState.config.spotifyPlaylist,
+              public: false,
+              description: 'All of your Enhancify bookmarks!',
+            };
+
+            const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`, playlistData, { headers: rootGetters.authHeader, });
+            commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
+          }
+
+          // Add song to playlist
+          
         }
 
         if (didBookmark) {
           commit('SET_AUTH_PROP', { prop: 'lastBookmarked', value: now });
         }
+      }
+    },
+
+    async findEnhancifyPlaylist({ rootState, rootGetters }) {
+      const limit = 50; // Max limit possible
+      let nextUrl = `https://api.spotify.com/v1/me/playlists?offset=0&limit=${limit}`;
+
+      let playlist;
+
+      do {
+        const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
+
+        // Check if it exists
+        playlist = response.data.items.find(p => p.name === rootState.config.spotifyPlaylist);
+
+        nextUrl = response.data.next;
+      } while (nextUrl !== null && typeof playlist === 'undefined');
+
+      if (typeof playlist !== 'undefined') {
+        return playlist.id;
+      } else {
+        return null;
       }
     },
   },

@@ -8,7 +8,11 @@ import router from '../router'
 export default {
   state: {
     port: 8080,
-    scope: ['user-read-playback-state'].join(' '),
+    scope: [
+      'user-read-playback-state',
+      'playlist-read-private',
+      'playlist-modify-private'
+    ].join(' '),
 
     state: pkce.createChallenge(),
     codePair: pkce.create(),
@@ -16,6 +20,7 @@ export default {
     access_token: undefined,
     token_type: undefined,
     expires_in: undefined,
+    user_id: undefined,
 
     refresh_token: undefined,
     refreshTokenTimeoutID: undefined,
@@ -91,8 +96,8 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: refresh_token });
 
         await dispatch('setupRefreshTokenTimeout');
-
         await dispatch('storeRefreshToken');
+        await dispatch('getUserId');
 
         // return true;
         return true;
@@ -103,8 +108,20 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
+        commit('SET_AUTH_PROP', { prop: 'user_id', value: undefined });
 
         return false;
+      }
+    },
+    
+    // Get the user ID after getting access token
+    async getUserId({ getters, commit }) {
+      const response = await axios.get('https://api.spotify.com/v1/me', { headers: getters.authHeader, });
+      
+      if (response.status === 200) {
+        commit('SET_AUTH_PROP', { prop: 'user_id', value: response.data.id });
+      } else {
+        commit('SET_AUTH_PROP', { prop: 'user_id', value: undefined });
       }
     },
 
@@ -161,6 +178,7 @@ export default {
       commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'token_type', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
+      commit('SET_AUTH_PROP', { prop: 'user_id', value: undefined });
       clearTimeout(state.refreshTokenTimeoutID);
       commit('SET_AUTH_PROP', { prop: 'refreshTokenTimeoutID', value: undefined });
       commit('SET_AUTH_PROP', { prop: 'refreshFailCount', value: 0 })
