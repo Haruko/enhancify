@@ -23,14 +23,14 @@ function formatTimeMS(ms) {
 
 export default {
   state: {
-    nowPlayingData: null,
+    nowPlayingData: undefined,
     interpolatedProgress: 0,
     previousAlbumArt: undefined,
 
     updateTimeoutID: undefined,
     secondsTimeoutID: undefined,
 
-    lastBookmarked: null,
+    lastBookmarked: undefined,
     bookmarkCooldown: 1000,
     bookmarkPlaylistID: undefined,
   },
@@ -58,15 +58,13 @@ export default {
         if (typeof responseData === 'object' && responseData !== null) {
           commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: responseData });
         } else {
-          commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: null });
+          commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: undefined });
         }
       } catch (error) {
-        responseData = null;
-
         if (error.response.status === 400) {
           await dispatch('loadRefreshToken');
 
-          if (rootState.auth.refresh_token === null) {
+          if (typeof rootState.auth.refresh_token === 'undefined') {
             // Unauthorized and have no saved refresh token
             await dispatch('deAuth');
           } else {
@@ -89,7 +87,7 @@ export default {
     async startNowPlayingTimeouts({ rootState, state, commit, dispatch }) {
       let timeoutLength;
 
-      if (state.nowPlayingData !== null && state.nowPlayingData.is_playing) {
+      if (typeof state.nowPlayingData !== 'undefined' && state.nowPlayingData.is_playing) {
         const calculated = (state.nowPlayingData.item.duration_ms -
             rootState.config.crossfade * 1000) -
           state.nowPlayingData.progress_ms;
@@ -178,7 +176,7 @@ export default {
       }
 
       // Album art
-      if (!progressOnly && state.nowPlayingData !== null) {
+      if (!progressOnly && typeof state.nowPlayingData !== 'undefined') {
         const albumArt = state.nowPlayingData.item.album.images;
         if (typeof albumArt === 'object' && albumArt.length > 0) {
           const url = albumArt[0].url;
@@ -191,13 +189,13 @@ export default {
     },
 
     async bookmarkNowPlaying({ state, rootState, getters, rootGetters, commit, dispatch }) {
-      if (state.nowPlayingData === null) {
+      if (typeof state.nowPlayingData === 'undefined') {
         return;
       }
 
       // Check for bookmark cooldown
       const now = Date.now();
-      const allowBookmark = state.allowBookmark === null || now - state.lastBookmarked > state.bookmarkCooldown;
+      const allowBookmark = typeof state.lastBookmarked === 'undefined' || now - state.lastBookmarked > state.bookmarkCooldown;
 
       if (allowBookmark && (rootState.config.saveBookmarksLocal || rootState.config.saveBookmarksSpotify)) {
         await dispatch('getNowPlayingData');
@@ -228,10 +226,10 @@ export default {
 
           // Check if playlist exists
           const playlist = await dispatch('findEnhancifyPlaylist');
-          if (playlist === null) {
+          if (typeof playlist === 'undefined') {
             // Create it
 
-            if (typeof rootState.auth.user_id === 'undefined' || rootState.auth.user_id === null) {
+            if (typeof rootState.auth.user_id === 'undefined' || typeof rootState.auth.user_id === 'undefined') {
               await dispatch('getUserId');
             }
 
@@ -273,22 +271,22 @@ export default {
       if (typeof playlist !== 'undefined') {
         return playlist.id;
       } else {
-        return null;
+        return undefined;
       }
     },
   },
 
   getters: {
     nowPlayingType(state) {
-      if (state.nowPlayingData !== null) {
+      if (typeof state.nowPlayingData !== 'undefined') {
         return state.nowPlayingData.currently_playing_type;
       } else {
-        return null;
+        return undefined;
       }
     },
 
     nowPlayingTitle(state, getters) {
-      if (state.nowPlayingData !== null && getters.nowPlayingType === 'track') {
+      if (typeof state.nowPlayingData !== 'undefined' && getters.nowPlayingType === 'track') {
         return state.nowPlayingData.item.name;
       } else {
         return 'Unknown';
@@ -296,7 +294,7 @@ export default {
     },
 
     nowPlayingArtist(state, getters) {
-      if (state.nowPlayingData !== null && getters.nowPlayingType === 'track') {
+      if (typeof state.nowPlayingData !== 'undefined' && getters.nowPlayingType === 'track') {
         return state.nowPlayingData.item.artists
           .map((artist) => artist.name).join(', ');
       } else {
@@ -305,7 +303,7 @@ export default {
     },
 
     nowPlayingAlbum(state, getters) {
-      if (state.nowPlayingData !== null && getters.nowPlayingType === 'track') {
+      if (typeof state.nowPlayingData !== 'undefined' && getters.nowPlayingType === 'track') {
         return state.nowPlayingData.item.album.name;
       } else {
         return 'Unknown';
@@ -313,7 +311,7 @@ export default {
     },
 
     nowPlayingLength(state, getters) {
-      if (state.nowPlayingData !== null && getters.nowPlayingType === 'track') {
+      if (typeof state.nowPlayingData !== 'undefined' && getters.nowPlayingType === 'track') {
         return formatTimeMS(state.nowPlayingData.item.duration_ms);
       } else {
         return '??:??';
@@ -321,7 +319,7 @@ export default {
     },
 
     nowPlayingProgress(state, getters) {
-      if (state.nowPlayingData !== null && getters.nowPlayingType === 'track') {
+      if (typeof state.nowPlayingData !== 'undefined' && getters.nowPlayingType === 'track') {
         // return formatTimeMS(state.nowPlayingData.progress_ms);
         return formatTimeMS(state.interpolatedProgress);
       } else {

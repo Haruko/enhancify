@@ -157,7 +157,7 @@ export default {
     async loadRefreshToken({ commit }) {
       let token = await ipcRenderer.invoke('read-file', 'token');
 
-      if (token !== null) {
+      if (typeof token !== 'undefined') {
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: token });
         return true;
       } else {

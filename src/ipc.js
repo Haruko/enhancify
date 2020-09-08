@@ -153,7 +153,7 @@ export function initIPC(win) {
     if (exists) {
       return await fs.readFile(filePath, { encoding: 'utf8' });
     } else {
-      return null;
+      return undefined;
     }
   });
 

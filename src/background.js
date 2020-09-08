@@ -72,7 +72,7 @@ function createWindow() {
 }
 
 function onWindowResize(width, height, window) {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && window !== null) {
     // Assume BrowserWindow object
     const bounds = window.getBounds();
     width = bounds.width;

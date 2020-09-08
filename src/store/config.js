@@ -65,7 +65,7 @@ export default {
       // Try to read file
       let config = await ipcRenderer.invoke('read-file', 'config');
 
-      if (config !== null) {
+      if (typeof config !== 'undefined') {
         try {
           // Loading from file
           config = json5.parse(config);
