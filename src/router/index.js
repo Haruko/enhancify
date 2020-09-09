@@ -1,9 +1,10 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import store from '../store'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import store from '../store';
+import { ipcRenderer } from 'electron';
 
-import Unauthorized from '../views/Unauthorized.vue'
-import Authorized from '../views/Authorized.vue'
+import Unauthorized from '../views/Unauthorized.vue';
+import Authorized from '../views/Authorized.vue';
 
 Vue.use(VueRouter)
 
@@ -13,6 +14,8 @@ const routes = [{
   component: Unauthorized,
 
   async beforeEnter(to, from, next) {
+    await ipcRenderer.invoke('auth-server-stop');
+    
     // Clear auth localStorage data
     await store.dispatch('clearLocalStorage');
 
@@ -30,20 +33,18 @@ const routes = [{
     }
   },
 }, {
-  path: '/cb',
+  path: '/callback',
   name: 'Callback',
 
   async beforeEnter(to, from, next) {
-    const authError = to.query.error;
-    const authState = to.query.state;
+    await ipcRenderer.invoke('auth-server-stop');
+    
     const authCode = to.query.code;
 
     // Load auth localStorage data
     await store.dispatch('loadFromLocalStorage');
 
-    if (authError || store.state.auth.state !== authState) {
-      next('/');
-    } else {
+    if (typeof authCode !== 'undefined') {
       try {
         await store.dispatch('requestAccessToken', authCode);
         next('/authorized');
@@ -65,7 +66,7 @@ const routes = [{
         if (typeof store.state.auth.access_token === 'undefined') {
           await store.dispatch('requestAccessToken');
         }
-        
+
         next();
       } catch (error) {
         next('/');
@@ -74,10 +75,10 @@ const routes = [{
       next('/');
     }
   },
-}, ]
+}];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   routes
 })
 

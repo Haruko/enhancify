@@ -3,7 +3,8 @@ const fs = require('fs-extra');
 const json5 = require('json5');
 const download = require('download');
 
-import { app, ipcMain, shell, globalShortcut } from 'electron'
+import { app, ipcMain, shell, globalShortcut } from 'electron';
+import AuthServer from './server';
 
 import config from 'json5-loader!./config.json5';
 
@@ -124,7 +125,26 @@ const keycodeMappings = {
   Slash: '/',
 };
 
+const authServerConfig = config.server[process.env.NODE_ENV];
+const authServer = new AuthServer(
+  authServerConfig.authPort,
+  authServerConfig.authSuccessUrl,
+  authServerConfig.authErrorUrl
+);
+
+
 export function initIPC(win) {
+  // Auth server
+  ipcMain.handle('auth-server-start', async (event, state) => {
+    return await authServer.startAuthServer(state);
+  });
+
+  ipcMain.handle('auth-server-stop', async (event) => {
+    return await authServer.stopAuthServer();
+  });
+
+
+
   // Window controls
   ipcMain.on('minimize-window', (event) => {
     win.minimize();
@@ -187,9 +207,9 @@ export function initIPC(win) {
       if (fileExists) {
         // Read in bookmarks file and check if it exists
         const existingBookmarks = await fs.readFile(filePath, { encoding: 'utf8' });
-        
+
         const existingBookmarksList = (existingBookmarks || '').split('\n');
-        
+
         const exists = existingBookmarksList.findIndex((track) => track === data) !== -1;
         shouldWrite = !exists;
       }

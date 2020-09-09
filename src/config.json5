@@ -33,4 +33,24 @@
     startTag: '<<',
     endTag: '>>',
   },
+  server: {
+    development: {
+      basePort: 8080,
+      // baseUrl: 'http://localhost:8080/#/',
+      
+      authPort: 8081,
+      authUrl: 'http://localhost:8081/callback',
+      authSuccessUrl: 'http://localhost:8080/#/callback',
+      authErrorUrl: 'http://localhost:8080/#/',
+    },
+    production: {
+      basePort: 80,
+      // baseUrl: 'app://./index.html#/',
+      
+      authPort: 8081,
+      authUrl: 'http://localhost:8081/callback',
+      authSuccessUrl: 'app://./index.html#/callback',
+      authErrorUrl: 'app://./index.html#/',
+    }
+  },
 }

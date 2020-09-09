@@ -25,10 +25,11 @@ export default {
     },
 
     canBookmark() {
-      return this.running && (
-        this.$store.state.config.saveBookmarksLocal ||
-        this.$store.state.config.saveBookmarksSpotify
-      );
+      return this.running &&
+        typeof this.$store.state.nowplaying.getNowPlayingData !== 'undefined' && (
+          this.$store.state.config.saveBookmarksLocal ||
+          this.$store.state.config.saveBookmarksSpotify
+        );
     },
   },
 

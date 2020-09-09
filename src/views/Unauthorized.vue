@@ -1,6 +1,6 @@
 <template>
   <VContainer>
-    <VExpansionPanels v-model="panels" multiple flat accordion class="main-panels" >
+    <VExpansionPanels v-model="panels" multiple flat accordion class="main-panels">
       <VExpansionPanel>
         <VExpansionPanelHeader class="header" disabled>
           Unauthorized!
@@ -20,6 +20,8 @@
   </VContainer>
 </template>
 <script>
+import { ipcRenderer } from 'electron';
+
 export default {
   name: 'Unauthorized',
 
@@ -31,8 +33,14 @@ export default {
 
   methods: {
     async authorize() {
-      await this.$store.dispatch('saveToLocalStorage')
-      location.replace(this.$store.getters.authUri);
+      await this.$store.dispatch('saveToLocalStorage');
+      const error = await ipcRenderer.invoke('auth-server-start', this.$store.state.auth.state);
+
+      if (!error) {
+        location.replace(this.$store.getters.authUri);
+      } else {
+        console.log(error);
+      }
     },
   },
 }

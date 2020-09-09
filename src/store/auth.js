@@ -5,6 +5,8 @@ const qs = require('querystring');
 import { ipcRenderer } from 'electron';
 import router from '../router'
 
+import config from 'json5-loader!@/config.json5';
+
 export default {
   state: {
     port: 8080,
@@ -191,8 +193,8 @@ export default {
   },
 
   getters: {
-    redirect_uri(state) {
-      return `http://localhost:${state.port}/cb`;
+    redirect_uri() {
+      return config.server[process.env.NODE_ENV].authUrl;
     },
 
     authUri(state, getters, rootState) {
