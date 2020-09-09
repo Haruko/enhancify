@@ -30,12 +30,9 @@ export default {
   },
 
   methods: {
-    authorize() {
-      // :href="$store.getters.authUri"
-      this.$store.dispatch('saveToLocalStorage')
-        .then(() => {
-          location.replace(this.$store.getters.authUri);
-        });
+    async authorize() {
+      await this.$store.dispatch('saveToLocalStorage')
+      location.replace(this.$store.getters.authUri);
     },
   },
 }

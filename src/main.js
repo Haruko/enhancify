@@ -8,18 +8,20 @@ import '@/assets/styles/main.scss'
 
 Vue.config.productionTip = false
 
-store.dispatch('loadConfig')
-  .then(() => {
-    window.removeEventListener('message', handleHotReload);
-    window.addEventListener('message', handleHotReload);
 
-    new Vue({
-      router,
-      store,
-      vuetify,
-      render: h => h(App)
-    }).$mount('#app')
-  });
+async function init() {
+  await store.dispatch('loadConfig');
+  window.removeEventListener('message', handleHotReload);
+  window.addEventListener('message', handleHotReload);
+
+  new Vue({
+    router,
+    store,
+    vuetify,
+    render: h => h(App)
+  }).$mount('#app');
+}
+
 
 async function handleHotReload(event) {
   if (event.data && typeof event.data === 'string' && /webpackHotUpdate/.test(event.data)) {
@@ -29,7 +31,7 @@ async function handleHotReload(event) {
       const exists = await store.dispatch('loadRefreshToken');
       if (exists) {
         try {
-          await store.dispatch('requestAccessToken'); 
+          await store.dispatch('requestAccessToken');
         } catch (error) {
           router.push('/');
         }
@@ -39,3 +41,5 @@ async function handleHotReload(event) {
     }
   }
 }
+
+init();
