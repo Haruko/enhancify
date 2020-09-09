@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '../store';
-import { ipcRenderer } from 'electron';
 
 import Unauthorized from '../views/Unauthorized.vue';
 import Authorized from '../views/Authorized.vue';
@@ -14,8 +13,6 @@ const routes = [{
   component: Unauthorized,
 
   async beforeEnter(to, from, next) {
-    await ipcRenderer.invoke('auth-server-stop');
-    
     // Clear auth localStorage data
     await store.dispatch('clearLocalStorage');
 
@@ -37,8 +34,6 @@ const routes = [{
   name: 'Callback',
 
   async beforeEnter(to, from, next) {
-    await ipcRenderer.invoke('auth-server-stop');
-    
     const authCode = to.query.code;
 
     // Load auth localStorage data

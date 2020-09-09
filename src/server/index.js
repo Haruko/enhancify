@@ -61,9 +61,10 @@ export default class AuthServer {
     await new Promise((resolve, reject) => {
       try {
         this.server.close(() => {
-          this.server = undefined;
           resolve();
         });
+
+        this.server = undefined;
       } catch (error) {
         reject(error);
       }
