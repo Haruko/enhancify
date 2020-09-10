@@ -31,7 +31,7 @@
           <VSwitch v-model="saveBookmarksSpotify" dense hide-details="true" label="Save to Spotify playlist"></VSwitch>
         </VCol>
         <VCol cols="6">
-          <VBtn disabled color="primary" small @click.native="/*open playlist in browser*/">Open bookmarks playlist</VBtn>
+          <VBtn color="primary" small @click.native="openPlaylist">Open bookmarks playlist</VBtn>
         </VCol>
       </VRow>
       <VRow no-gutters align="center">
@@ -128,6 +128,10 @@ export default {
 
     openBookmarksDir() {
       ipcRenderer.send('open-directory', 'bookmarks');
+    },
+    
+    async openPlaylist() {
+      await this.$store.dispatch('openBookmarksPlaylist');
     },
 
     startRecordingHotkeys() {

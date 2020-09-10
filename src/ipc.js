@@ -2,6 +2,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const json5 = require('json5');
 const download = require('download');
+const commandExists = require('command-exists');
+const child_process = require('child_process');
 
 import { app, ipcMain, shell, globalShortcut } from 'electron';
 import AuthServer from './server';
@@ -252,6 +254,48 @@ export function initIPC(win) {
 
     await fs.ensureFile(filePath);
     await shell.openPath(filePath);
+  });
+
+
+
+  // Open External
+
+  // Decide to open in browser or application depending on if application is installed
+  // preference = 'desktop' or 'browser'
+  ipcMain.on('open-playlist', async (event, playlistId, preference) => {
+    // Sanitize
+    playlistId = playlistId.split(' ')[0];
+    preference = preference.toLowerCase();
+    if (preference !== 'desktop' && preference !== 'browser') {
+      preference = 'browser';
+    }
+
+    const desktopExists = await commandExists('spotify');
+
+    try {
+      if (desktopExists && preference === 'desktop') {
+        // Open in desktop client
+        // spotify --protocol-uri="spotify:playlist:${playlistId}"
+
+        await new Promise((resolve, reject) => {
+          child_process.exec(`spotify --protocol-uri="spotify:playlist:${playlistId}"`,
+            (error) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve();
+              }
+            });
+        });
+      } else {
+        // Open in browser
+        // https://open.spotify.com/playlist/${playlistId}
+
+        await shell.openExternal(`https://open.spotify.com/playlist/${playlistId}`);
+      }
+    } catch (error) {
+
+    }
   });
 
 

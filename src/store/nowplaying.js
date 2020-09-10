@@ -432,6 +432,11 @@ export default {
 
       await dispatch('stopNowPlayingTimeouts');
     },
+
+    // preference = 'desktop' or 'browser'
+    async openBookmarksPlaylist({ rootState }, preference='desktop') {
+      ipcRenderer.send('open-playlist', rootState.config.spotifyPlaylistId, preference);
+    },
   },
 
   getters: {
