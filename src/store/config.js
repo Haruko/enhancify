@@ -61,9 +61,9 @@ export default {
   },
 
   actions: {
-    async loadConfig({ commit, dispatch }) {
+    async loadConfig({ commit, getters, dispatch }) {
       // Try to read file
-      let config = await ipcRenderer.invoke('read-file', 'config');
+      let config = await ipcRenderer.invoke('read-file', 'config', getters.userConfigFile);
 
       if (typeof config !== 'undefined') {
         try {
@@ -81,7 +81,7 @@ export default {
       }
     },
 
-    async storeConfig({ state }) {
+    async storeConfig({ state, getters }) {
       const stateCopy = { ...state };
 
       // Remove blank info
@@ -90,7 +90,7 @@ export default {
 
       stateCopy.fileFormats = fileFormatsCopy;
 
-      await ipcRenderer.invoke('write-file', 'config', json5.stringify(stateCopy));
+      await ipcRenderer.invoke('write-file', 'config', json5.stringify(stateCopy), getters.userConfigFile);
     },
 
     async changeConfigProp({ commit, dispatch }, { prop, value }) {
@@ -137,6 +137,10 @@ export default {
   },
 
   getters: {
+    userConfigFile(state, getters, rootState) {
+      return `${rootState.auth.user_id}.config`;
+    },
+
     bookmarkFlagState(state) {
       // 0b01 = local, 0b10 = spotify
       let flagState = 0b00;

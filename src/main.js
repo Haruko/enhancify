@@ -9,7 +9,6 @@ import '@/assets/styles/main.scss';
 Vue.config.productionTip = false;
 
 async function init() {
-  await store.dispatch('loadConfig');
   window.removeEventListener('message', handleHotReload);
   window.addEventListener('message', handleHotReload);
 
