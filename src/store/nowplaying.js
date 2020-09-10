@@ -35,7 +35,6 @@ export default {
     lastBookmarkedTime: undefined,
     lastBookmarkedUri: undefined,
     lastBookmarkedFlagState: undefined,
-    bookmarkPlaylistID: undefined,
   },
 
   mutations: {
@@ -287,7 +286,7 @@ export default {
             }
 
             const playlistData = {
-              name: rootState.config.spotifyPlaylist,
+              name: rootState.config.spotifyPlaylistName,
               public: false,
               description: config.bookmarks.playlistDescription,
             };
@@ -297,9 +296,9 @@ export default {
                 headers: rootGetters.authHeader,
               });
 
-            commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
+            commit('SET_CONFIG_PROP', { prop: 'spotifyPlaylistId', value: createResponse.data.id });
           } else {
-            commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkPlaylistID', value: foundPlaylist.id });
+            commit('SET_CONFIG_PROP', { prop: 'spotifyPlaylistId', value: foundPlaylist });
           }
 
 
@@ -309,13 +308,13 @@ export default {
           // Check for duplicate
           // We can skip this if we had to create the playlist
           if (typeof foundPlaylist !== 'undefined' && !(bookmarkDupeFlagState & 0b10)) {
-            const track = await dispatch('findTrackInPlaylist', { playlistId: state.bookmarkPlaylistID, trackId: state.nowPlayingData.item.id });
+            const track = await dispatch('findTrackInPlaylist', { playlistId: rootState.config.spotifyPlaylistId, trackId: state.nowPlayingData.item.id });
             shouldWrite = !track;
           }
 
           // Add song to playlist
           if (shouldWrite) {
-            await axios.post(`https://api.spotify.com/v1/playlists/${state.bookmarkPlaylistID}/tracks`, {
+            await axios.post(`https://api.spotify.com/v1/playlists/${rootState.config.spotifyPlaylistId}/tracks`, {
               uris: [state.nowPlayingData.item.uri],
             }, {
               headers: rootGetters.authHeader,
@@ -340,23 +339,19 @@ export default {
     },
 
     async findEnhancifyPlaylist({ rootState, rootGetters }) {
-      const limit = 50; // Max limit possible
-      let nextUrl = `https://api.spotify.com/v1/me/playlists?offset=0&limit=${limit}`;
+      const playlistId = rootState.config.spotifyPlaylistId;
 
-      let playlist;
+      if (typeof playlistId !== 'undefined') {
+        const queryUrl = `https://api.spotify.com/v1/playlists/${playlistId}?fields=id`;
 
-      do {
-        await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
-        const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
-
-        // Check if it exists
-        playlist = response.data.items.find(p => p.name === rootState.config.spotifyPlaylist);
-
-        nextUrl = response.data.next;
-      } while (nextUrl !== null && typeof playlist === 'undefined');
-
-      if (typeof playlist !== 'undefined') {
-        return playlist;
+        try {
+          await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
+          const response = await axios.get(queryUrl, { headers: rootGetters.authHeader, });
+          
+          return response.data.id;
+        } catch (error) {
+          return undefined;
+        }
       } else {
         return undefined;
       }
@@ -391,7 +386,7 @@ export default {
       commit('SET_NOWPLAYING_PROP', { prop: 'previousAlbumArt', value: undefined });
       commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedTime', value: undefined });
       commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedUri', value: undefined });
-      commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkPlaylistID', value: undefined });
+      commit('SET_CONFIG_PROP', { prop: 'spotifyPlaylistId', value: undefined });
 
       await dispatch('stopNowPlayingTimeouts');
     }

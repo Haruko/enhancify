@@ -31,6 +31,7 @@
     maxBookmarkRequestInterval: 250, // ms
   },
   bookmarks: {
+    playlistName: 'Enhancify Bookmarks',
     playlistDescription: 'All of your Enhancify bookmarks!',
   },
   labels: {

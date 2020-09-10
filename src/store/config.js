@@ -3,6 +3,8 @@ const json5 = require('json5');
 import { ipcRenderer } from 'electron';
 import Vue from 'vue'
 
+import config from 'json5-loader!@/config.json5';
+
 export default {
   state: {
     // Editable by user if they want to for whatever reason
@@ -28,7 +30,8 @@ export default {
     allowDupesLocal: false,
     saveBookmarksSpotify: false,
     allowDupesSpotify: false,
-    spotifyPlaylist: 'Enhancify Bookmarks',
+    spotifyPlaylistName: config.bookmarks.playlistName,
+    spotifyPlaylistId: undefined,
   },
 
   mutations: {
@@ -113,7 +116,7 @@ export default {
 
     async updateFileFormat({ state, commit, dispatch }, { format, index }) {
       commit('UPDATE_FILE_FORMAT', { format, index });
-      
+
       if (format.filename === '' && format.format === '') {
         // If this file format changes to completely empty, then remove other empty one
         const emptyIndex = state.fileFormats
@@ -135,23 +138,23 @@ export default {
       await dispatch('storeConfig');
     },
   },
-  
+
   getters: {
     bookmarkFlagState(state) {
       // 0b01 = local, 0b10 = spotify
       let flagState = 0b00;
       flagState |= state.saveBookmarksLocal ? 0b01 : 0b00;
       flagState |= state.saveBookmarksSpotify ? 0b10 : 0b00;
-      
+
       return flagState;
     },
-    
+
     bookmarkDupeFlagState(state) {
       // 0b01 = local, 0b10 = spotify
       let flagState = 0b00;
       flagState |= state.allowDupesLocal ? 0b01 : 0b00;
       flagState |= state.allowDupesSpotify ? 0b10 : 0b00;
-      
+
       return flagState;
     },
   },
