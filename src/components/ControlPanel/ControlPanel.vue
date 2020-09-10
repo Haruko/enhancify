@@ -26,7 +26,7 @@ export default {
 
     canBookmark() {
       return this.running &&
-        typeof this.$store.state.nowplaying.getNowPlayingData !== 'undefined' && (
+        typeof this.$store.state.nowplaying.nowPlayingData !== 'undefined' && (
           this.$store.state.config.saveBookmarksLocal ||
           this.$store.state.config.saveBookmarksSpotify
         );
