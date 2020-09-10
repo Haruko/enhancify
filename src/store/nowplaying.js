@@ -276,45 +276,45 @@ export default {
           (state.lastBookmarkedFlagState & 0b10) === 0)
       ) {
         try {
-          // Check if playlist exists
-          const foundPlaylist = await dispatch('findEnhancifyPlaylist');
-
-          if (typeof foundPlaylist === 'undefined') {
-            // Create it
-            if (typeof rootState.auth.user_id === 'undefined') {
-              await dispatch('getUserId');
-            }
-
-            const playlistData = {
-              name: rootState.config.spotifyPlaylistName,
-              public: false,
-              description: config.bookmarks.playlistDescription,
-            };
-
-            const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`,
-              playlistData, {
-                headers: rootGetters.authHeader,
-              });
-
-            commit('SET_CONFIG_PROP', { prop: 'spotifyPlaylistId', value: createResponse.data.id });
-          } else {
-            commit('SET_CONFIG_PROP', { prop: 'spotifyPlaylistId', value: foundPlaylist });
+          if (typeof rootState.auth.user_id === 'undefined') {
+            await dispatch('getUserId');
           }
 
+          const userId = rootState.auth.user_id;
+
+          // Check if playlist exists
+          const playlistExists = await dispatch('checkIfPlaylistExists', rootState.config.spotifyPlaylistId);
+
+          if (!playlistExists) {
+            // Create it
+            const playlistId = await dispatch('createPlaylist', userId);
+
+            await dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: playlistId });
+          }
+
+          const playlistId = rootState.config.spotifyPlaylistId;
+
+          // Check if following playlist because deleting is the same as unfollowing
+          const following = await dispatch('checkIfFollowingPlaylist', { playlistId: playlistId, userId: userId });
+
+          if (!following) {
+            // Follow it
+            await dispatch('followPlaylist', playlistId);
+          }
 
 
           let shouldWrite = true;
 
           // Check for duplicate
           // We can skip this if we had to create the playlist
-          if (typeof foundPlaylist !== 'undefined' && !(bookmarkDupeFlagState & 0b10)) {
-            const track = await dispatch('findTrackInPlaylist', { playlistId: rootState.config.spotifyPlaylistId, trackId: state.nowPlayingData.item.id });
+          if (playlistExists && !(bookmarkDupeFlagState & 0b10)) {
+            const track = await dispatch('findTrackInPlaylist', { playlistId: playlistId, trackId: state.nowPlayingData.item.id });
             shouldWrite = !track;
           }
 
           // Add song to playlist
           if (shouldWrite) {
-            await axios.post(`https://api.spotify.com/v1/playlists/${rootState.config.spotifyPlaylistId}/tracks`, {
+            await axios.post(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
               uris: [state.nowPlayingData.item.uri],
             }, {
               headers: rootGetters.authHeader,
@@ -338,8 +338,8 @@ export default {
       commit('SET_NOWPLAYING_PROP', { prop: 'currentlyBookmarking', value: false });
     },
 
-    async findEnhancifyPlaylist({ rootState, rootGetters }) {
-      const playlistId = rootState.config.spotifyPlaylistId;
+    // Check if it exists
+    async checkIfPlaylistExists({ rootGetters }, playlistId) {
 
       if (typeof playlistId !== 'undefined') {
         const queryUrl = `https://api.spotify.com/v1/playlists/${playlistId}?fields=id`;
@@ -347,14 +347,56 @@ export default {
         try {
           await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
           const response = await axios.get(queryUrl, { headers: rootGetters.authHeader, });
-          
-          return response.data.id;
+
+          return typeof response.data.id !== 'undefined';
         } catch (error) {
           return undefined;
         }
       } else {
         return undefined;
       }
+    },
+
+    async createPlaylist({ rootState, rootGetters }, userId) {
+      const playlistData = {
+        name: rootState.config.spotifyPlaylistName,
+        public: false,
+        description: config.bookmarks.playlistDescription,
+      };
+
+      const response = await axios.post(`https://api.spotify.com/v1/users/${userId}/playlists`,
+        playlistData, {
+          headers: rootGetters.authHeader,
+        });
+
+      return response.data.id;
+    },
+
+    // Check if we are following a playlist
+    async checkIfFollowingPlaylist({ rootGetters }, { playlistId, userId }) {
+      if (typeof playlistId !== 'undefined') {
+        const queryUrl = `https://api.spotify.com/v1/playlists/${playlistId}/followers/contains?ids=${userId}`;
+
+        try {
+          await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
+          const response = await axios.get(queryUrl, { headers: rootGetters.authHeader, });
+
+          return response.data[0];
+        } catch (error) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    },
+
+    async followPlaylist({ rootGetters }, playlistId) {
+      await axios.put(`https://api.spotify.com/v1/playlists/${playlistId}/followers`, {
+        public: false,
+      }, {
+        headers: rootGetters.authHeader,
+        'Content-Type': 'application/json',
+      });
     },
 
     async findTrackInPlaylist({ rootGetters }, { playlistId, trackId }) {
@@ -386,10 +428,10 @@ export default {
       commit('SET_NOWPLAYING_PROP', { prop: 'previousAlbumArt', value: undefined });
       commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedTime', value: undefined });
       commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedUri', value: undefined });
-      commit('SET_CONFIG_PROP', { prop: 'spotifyPlaylistId', value: undefined });
+      // await dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: undefined });
 
       await dispatch('stopNowPlayingTimeouts');
-    }
+    },
   },
 
   getters: {
