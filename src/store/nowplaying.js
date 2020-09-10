@@ -289,7 +289,7 @@ export default {
             const playlistData = {
               name: rootState.config.spotifyPlaylist,
               public: false,
-              description: 'All of your Enhancify bookmarks!',
+              description: config.bookmarks.playlistDescription,
             };
 
             const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`,

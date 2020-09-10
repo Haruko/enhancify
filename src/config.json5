@@ -30,6 +30,9 @@
     maxRequestInterval: 10000, // ms
     maxBookmarkRequestInterval: 250, // ms
   },
+  bookmarks: {
+    playlistDescription: 'All of your Enhancify bookmarks!',
+  },
   labels: {
     startTag: '<<',
     endTag: '>>',
