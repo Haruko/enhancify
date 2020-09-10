@@ -28,6 +28,7 @@
   },
   api: {
     maxRequestInterval: 10000, // ms
+    maxBookmarkRequestInterval: 250, // ms
   },
   labels: {
     startTag: '<<',

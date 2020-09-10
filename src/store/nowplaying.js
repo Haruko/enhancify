@@ -219,6 +219,8 @@ export default {
 
         // Spotify playlist
         if (rootState.config.saveBookmarksSpotify) {
+          let createdPlaylist = false;
+          
           if (typeof state.bookmarkPlaylistID === 'undefined') {
             // Check if playlist exists
             const playlist = await dispatch('findEnhancifyPlaylist');
@@ -239,7 +241,9 @@ export default {
                 playlistData, {
                   headers: rootGetters.authHeader,
                 });
+              
               commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
+              createdPlaylist = true;
             } else {
               commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: playlist.id });
             }
@@ -248,7 +252,8 @@ export default {
           let shouldWrite = true;
 
           // Check for duplicate
-          if (!rootState.config.allowDupesSpotify) {
+          // We can skip this if we had to create the playlist
+          if (!createdPlaylist && !rootState.config.allowDupesSpotify) {
             const track = await dispatch('findTrackInPlaylist', { playlistId: state.bookmarkPlaylistID, trackId: state.nowPlayingData.item.id });
             shouldWrite = !track;
           }
@@ -279,6 +284,7 @@ export default {
       let playlist;
 
       do {
+        await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
         const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
 
         // Check if it exists
@@ -301,6 +307,7 @@ export default {
       let foundTrack;
 
       do {
+        await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
         const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
 
         // Check if it exists
