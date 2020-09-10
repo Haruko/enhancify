@@ -29,7 +29,8 @@ function createWindow() {
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      devTools: isDevelopment,
     }
   })
 
@@ -50,31 +51,22 @@ function createWindow() {
 
   win.on('closed', () => {
     win = null
-  })
-
-  win.on('will-resize', (event, newBounds) => {
-    onWindowResize(newBounds.width, newBounds.height);
   });
 
-  win.on('maximize', (event) => {
-    onWindowResize(null, null, win);
-  });
+  // win.on('will-resize', (event, newBounds) => onWindowResize(win, newBounds.width, newBounds.height));
+  win.on('resize', (event) => onWindowResize(win));
+  win.on('maximize', (event) => onWindowResize(win));
+  win.on('unmaximize', (event) => onWindowResize(win));
 
-  win.on('unmaximize', (event) => {
-    onWindowResize(null, null, win);
-  });
+  win.on('will-quit', (event) => globalShortcut.unregisterAll());
 
-  win.on('will-quit', (event) => {
-    globalShortcut.unregisterAll();
-  });
-  
   initIPC(win);
 }
 
-function onWindowResize(width, height, window) {
-  if (typeof window !== 'undefined' && window !== null) {
+function onWindowResize(context, width, height) {
+  if (typeof width === 'undefined' || typeof height === 'undefined') {
     // Assume BrowserWindow object
-    const bounds = window.getBounds();
+    const bounds = context.getBounds();
     width = bounds.width;
     height = bounds.height;
   }
