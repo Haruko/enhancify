@@ -9,6 +9,7 @@ import config from 'json5-loader!@/config.json5';
 
 export default {
   state: {
+    client_id: config.api.client_id,
     port: 8080,
     scope: [
       'user-read-playback-state',
@@ -64,7 +65,7 @@ export default {
 
     // Request new access token from Spotify
     // Handles both authorization and refresh token payloads
-    async requestAccessToken({ state, rootState, getters, commit, dispatch }, authCode) {
+    async requestAccessToken({ state, getters, commit, dispatch }, authCode) {
       let reqData;
 
       if (typeof authCode === 'undefined') {
@@ -72,12 +73,12 @@ export default {
         reqData = {
           grant_type: 'refresh_token',
           refresh_token: state.refresh_token,
-          client_id: rootState.config.client_id,
+          client_id: state.client_id,
         };
       } else {
         // Means this is from the callback so we need to compare state and get the auth code
         reqData = {
-          client_id: rootState.config.client_id,
+          client_id: state.client_id,
           grant_type: 'authorization_code',
           code: authCode,
           redirect_uri: getters.redirect_uri,
@@ -197,9 +198,9 @@ export default {
       return config.server[process.env.NODE_ENV].authUrl;
     },
 
-    authUri(state, getters, rootState) {
+    authUri(state, getters) {
       const authURI = 'https://accounts.spotify.com/authorize?' +
-        `client_id=${rootState.config.client_id}&` +
+        `client_id=${state.client_id}&` +
         `response_type=code&` +
         `redirect_uri=${getters.redirect_uri}&` +
         `code_challenge_method=S256&` +

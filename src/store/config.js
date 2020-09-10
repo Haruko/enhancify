@@ -7,9 +7,6 @@ import config from 'json5-loader!@/config.json5';
 
 export default {
   state: {
-    // Editable by user if they want to for whatever reason
-    client_id: '925a4155c7ea4913a35fc79f5eec4828',
-
     // Editable by user in frontend
     fileFormats: [{
       filename: 'trackinfo.txt',

@@ -27,6 +27,7 @@
     },
   },
   api: {
+    client_id: '925a4155c7ea4913a35fc79f5eec4828',
     maxRequestInterval: 10000, // ms
     maxBookmarkRequestInterval: 250, // ms
   },
