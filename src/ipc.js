@@ -197,27 +197,33 @@ export function initIPC(win) {
     await download(url, getFileBasePath(type), { filename: filename });
   });
 
-  ipcMain.on('bookmark-song', async (event, data, allowDuplicates = true) => {
+  ipcMain.handle('bookmark-song', async (event, data, allowDuplicates = true) => {
     const filePath = path.join(getFileBasePath('bookmarks'), getFileName('bookmarks'));
 
     let shouldWrite = true;
 
-    if (!allowDuplicates) {
-      const fileExists = await fs.pathExists(filePath);
-      if (fileExists) {
-        // Read in bookmarks file and check if it exists
-        const existingBookmarks = await fs.readFile(filePath, { encoding: 'utf8' });
+    try {
+      if (!allowDuplicates) {
+        const fileExists = await fs.pathExists(filePath);
+        if (fileExists) {
+          // Read in bookmarks file and check if it exists
+          const existingBookmarks = await fs.readFile(filePath, { encoding: 'utf8' });
 
-        const existingBookmarksList = (existingBookmarks || '').split('\n');
+          const existingBookmarksList = (existingBookmarks || '').split('\n');
 
-        const exists = existingBookmarksList.findIndex((track) => track === data) !== -1;
-        shouldWrite = !exists;
+          const exists = existingBookmarksList.findIndex((track) => track === data) !== -1;
+          shouldWrite = !exists;
+        }
       }
-    }
 
-    if (shouldWrite) {
-      await fs.ensureFile(filePath);
-      await fs.writeFile(filePath, data + '\n', { flag: 'a' });
+      if (shouldWrite) {
+        await fs.ensureFile(filePath);
+        await fs.writeFile(filePath, data + '\n', { flag: 'a' });
+      }
+
+      return shouldWrite;
+    } catch (error) {
+      return false;
     }
   });
 

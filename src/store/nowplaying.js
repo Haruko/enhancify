@@ -31,12 +31,15 @@ export default {
     secondsTimeoutID: undefined,
 
     bookmarkCooldown: 1000,
-    lastBookmarked: undefined,
+    currentlyBookmarking: false,
+    lastBookmarkedTime: undefined,
+    lastBookmarkedUri: undefined,
+    lastBookmarkedFlagState: undefined,
     bookmarkPlaylistID: undefined,
   },
 
   mutations: {
-    SET_AUTH_PROP(state, { prop, value }) {
+    SET_NOWPLAYING_PROP(state, { prop, value }) {
       state[prop] = value;
     },
 
@@ -56,9 +59,9 @@ export default {
         responseData = response.data;
 
         if (typeof responseData === 'object' && responseData !== null) {
-          commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: responseData });
+          commit('SET_NOWPLAYING_PROP', { prop: 'nowPlayingData', value: responseData });
         } else {
-          commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: undefined });
+          commit('SET_NOWPLAYING_PROP', { prop: 'nowPlayingData', value: undefined });
         }
       } catch (error) {
         if (error.response.status === 400) {
@@ -96,7 +99,7 @@ export default {
 
         // Subtract 1 second because Spotify's API seems to be ahead, probably due to buffering
         const progress = state.nowPlayingData.progress_ms - 1000;
-        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: progress });
+        commit('SET_NOWPLAYING_PROP', { prop: 'interpolatedProgress', value: progress });
         await dispatch('startSecondsTimeout', { length: timeoutLength, progress: progress });
       } else {
         timeoutLength = config.api.maxRequestInterval;
@@ -109,7 +112,7 @@ export default {
         await dispatch('startNowPlayingTimeouts');
       }, timeoutLength);
 
-      commit('SET_AUTH_PROP', { prop: 'updateTimeoutID', value: timeoutID });
+      commit('SET_NOWPLAYING_PROP', { prop: 'updateTimeoutID', value: timeoutID });
     },
 
     async startSecondsTimeout({ commit, dispatch }, { length, progress }) {
@@ -119,12 +122,12 @@ export default {
 
       const timeoutID = setTimeout(async (currentProgress) => {
         currentProgress += 1000;
-        commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: currentProgress });
+        commit('SET_NOWPLAYING_PROP', { prop: 'interpolatedProgress', value: currentProgress });
         await dispatch('writeOutputFiles', true);
         await dispatch('startSecondsTimeout', { length: length - 1000, progress: currentProgress });
       }, 1000, progress);
 
-      commit('SET_AUTH_PROP', { prop: 'secondsTimeoutID', value: timeoutID });
+      commit('SET_NOWPLAYING_PROP', { prop: 'secondsTimeoutID', value: timeoutID });
     },
 
     async stopNowPlayingTimeouts({ commit }) {
@@ -181,79 +184,131 @@ export default {
         if (typeof albumArt === 'object' && albumArt.length > 0) {
           const url = albumArt[0].url;
           if (url !== state.previousAlbumArt) {
-            commit('SET_AUTH_PROP', { prop: 'previousAlbumArt', value: url });
+            commit('SET_NOWPLAYING_PROP', { prop: 'previousAlbumArt', value: url });
             await ipcRenderer.invoke('download-file', url, 'album');
           }
         }
       }
     },
 
-    async bookmarkNowPlaying({ state, rootState, getters, rootGetters, commit, dispatch }) {
-      if (typeof state.nowPlayingData === 'undefined') {
+    async bookmarkNowPlaying({ state, rootState, commit, getters, rootGetters, dispatch }) {
+      // Check for basic bookmark blocks
+      if (
+        // Currently in the process of bookmarking
+        state.currentlyBookmarking ||
+        // We don't want to bookmark things
+        (
+          !rootState.config.saveBookmarksLocal &&
+          !rootState.config.saveBookmarksSpotify
+        ) ||
+        // We need to wait longer before bookmarking
+        (
+          typeof state.lastBookmarkedTime !== 'undefined' &&
+          Date.now() - state.lastBookmarkedTime <= state.bookmarkCooldown
+        )
+      ) {
         return;
       }
 
-      // Check for bookmark cooldown
-      const now = Date.now();
-      const allowBookmark = typeof state.lastBookmarked === 'undefined' || now - state.lastBookmarked > state.bookmarkCooldown;
 
-      if (allowBookmark && (rootState.config.saveBookmarksLocal || rootState.config.saveBookmarksSpotify)) {
+
+      commit('SET_NOWPLAYING_PROP', { prop: 'currentlyBookmarking', value: true });
+
+      // Update now playing data to get most recent
+      try {
         await dispatch('getNowPlayingData');
         await dispatch('writeOutputFiles');
         await dispatch('stopNowPlayingTimeouts');
         await dispatch('startNowPlayingTimeouts');
+      } catch (error) {
+        commit('SET_NOWPLAYING_PROP', { prop: 'currentlyBookmarking', value: false });
+        return;
+      }
 
-        let didBookmark = false;
+      // Set it here so we can't spam if the next check fails
+      commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedTime', value: Date.now() });
 
-        // Local
-        if (rootState.config.saveBookmarksLocal) {
-          // track, artist, uri
-          const artists = getters.nowPlayingArtist;
-          const track = getters.nowPlayingTitle;
-          const uri = state.nowPlayingData.item.external_urls.spotify;
-          const bookmarkText = `"${artists.replace(/"/g, '""')}","${track.replace(/"/g, '""')}","${uri.replace(/"/g, '""')}"`;
 
-          ipcRenderer.send('bookmark-song', bookmarkText, rootState.config.allowDupesLocal);
-          didBookmark = true;
-        }
 
-        // Spotify playlist
-        if (rootState.config.saveBookmarksSpotify) {
-          let createdPlaylist = false;
-          
-          if (typeof state.bookmarkPlaylistID === 'undefined') {
-            // Check if playlist exists
-            const playlist = await dispatch('findEnhancifyPlaylist');
-            if (typeof playlist === 'undefined') {
-              // Create it
+      // Save it in case the user changes
+      const bookmarkFlagState = rootGetters.bookmarkFlagState;
+      const bookmarkDupeFlagState = rootGetters.bookmarkDupeFlagState;
+      const isLastBookmarked = state.nowPlayingData.item.uri === state.lastBookmarkedUri;
 
-              if (typeof rootState.auth.user_id === 'undefined' || typeof rootState.auth.user_id === 'undefined') {
-                await dispatch('getUserId');
-              }
+      // Check if anything is playing
+      if (typeof state.nowPlayingData === 'undefined') {
+        commit('SET_NOWPLAYING_PROP', { prop: 'currentlyBookmarking', value: false });
+        return;
+      }
 
-              const playlistData = {
-                name: rootState.config.spotifyPlaylist,
-                public: false,
-                description: 'All of your Enhancify bookmarks!',
-              };
 
-              const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`,
-                playlistData, {
-                  headers: rootGetters.authHeader,
-                });
-              
-              commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
-              createdPlaylist = true;
-            } else {
-              commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: playlist.id });
+
+      // Do the actual bookmarking
+      let didBookmark = 0b00;
+
+      // Local
+      if (
+        // We want to bookmark local
+        (bookmarkFlagState & 0b01) &&
+        // Not the same song or the state has changed to allow bookmarks now
+        (
+          !isLastBookmarked ||
+          (state.lastBookmarkedFlagState & 0b01) === 0)
+      ) {
+        // track, artist, uri
+        const artists = getters.nowPlayingArtist;
+        const track = getters.nowPlayingTitle;
+        const uri = state.nowPlayingData.item.external_urls.spotify;
+        const bookmarkText = `"${artists.replace(/"/g, '""')}","${track.replace(/"/g, '""')}","${uri.replace(/"/g, '""')}"`;
+
+        const success = await ipcRenderer.invoke('bookmark-song', bookmarkText, bookmarkDupeFlagState & 0b01);
+        didBookmark |= success && 0b01;
+      }
+
+
+
+      // Spotify
+      if (
+        // We want to bookmark remote
+        (bookmarkFlagState & 0b10) &&
+        // Not the same song or the state has changed to allow bookmarks now
+        (
+          !isLastBookmarked ||
+          (state.lastBookmarkedFlagState & 0b10) === 0)
+      ) {
+        try {
+          // Check if playlist exists
+          const foundPlaylist = await dispatch('findEnhancifyPlaylist');
+
+          if (typeof foundPlaylist === 'undefined') {
+            // Create it
+            if (typeof rootState.auth.user_id === 'undefined') {
+              await dispatch('getUserId');
             }
+
+            const playlistData = {
+              name: rootState.config.spotifyPlaylist,
+              public: false,
+              description: 'All of your Enhancify bookmarks!',
+            };
+
+            const createResponse = await axios.post(`https://api.spotify.com/v1/users/${rootState.auth.user_id}/playlists`,
+              playlistData, {
+                headers: rootGetters.authHeader,
+              });
+
+            commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkPlaylistID', value: createResponse.data.id });
+          } else {
+            commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkPlaylistID', value: foundPlaylist.id });
           }
+
+
 
           let shouldWrite = true;
 
           // Check for duplicate
           // We can skip this if we had to create the playlist
-          if (!createdPlaylist && !rootState.config.allowDupesSpotify) {
+          if (typeof foundPlaylist !== 'undefined' && !(bookmarkDupeFlagState & 0b10)) {
             const track = await dispatch('findTrackInPlaylist', { playlistId: state.bookmarkPlaylistID, trackId: state.nowPlayingData.item.id });
             shouldWrite = !track;
           }
@@ -265,16 +320,23 @@ export default {
             }, {
               headers: rootGetters.authHeader,
             });
-          }
-          
-          // Set this to true even if we didn't bookmark it so that it can't be spammed
-          didBookmark = true;
-        }
 
-        if (didBookmark) {
-          commit('SET_AUTH_PROP', { prop: 'lastBookmarked', value: now });
+            didBookmark |= 0b10;
+          }
+        } catch (error) {
+          // Just say we didn't do it so we can come back and do it next time
         }
       }
+
+
+
+      if (didBookmark) {
+        commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedUri', value: state.nowPlayingData.item.uri });
+      }
+
+      commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedFlagState', value: bookmarkFlagState });
+      commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedTime', value: Date.now() });
+      commit('SET_NOWPLAYING_PROP', { prop: 'currentlyBookmarking', value: false });
     },
 
     async findEnhancifyPlaylist({ rootState, rootGetters }) {
@@ -324,11 +386,12 @@ export default {
     },
 
     async deAuthNowPlaying({ commit, dispatch }) {
-      commit('SET_AUTH_PROP', { prop: 'nowPlayingData', value: undefined });
-      commit('SET_AUTH_PROP', { prop: 'interpolatedProgress', value: 0 });
-      commit('SET_AUTH_PROP', { prop: 'previousAlbumArt', value: undefined });
-      commit('SET_AUTH_PROP', { prop: 'lastBookmarked', value: undefined });
-      commit('SET_AUTH_PROP', { prop: 'bookmarkPlaylistID', value: undefined });
+      commit('SET_NOWPLAYING_PROP', { prop: 'nowPlayingData', value: undefined });
+      commit('SET_NOWPLAYING_PROP', { prop: 'interpolatedProgress', value: 0 });
+      commit('SET_NOWPLAYING_PROP', { prop: 'previousAlbumArt', value: undefined });
+      commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedTime', value: undefined });
+      commit('SET_NOWPLAYING_PROP', { prop: 'lastBookmarkedUri', value: undefined });
+      commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkPlaylistID', value: undefined });
 
       await dispatch('stopNowPlayingTimeouts');
     }

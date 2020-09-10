@@ -135,4 +135,24 @@ export default {
       await dispatch('storeConfig');
     },
   },
+  
+  getters: {
+    bookmarkFlagState(state) {
+      // 0b01 = local, 0b10 = spotify
+      let flagState = 0b00;
+      flagState |= state.saveBookmarksLocal ? 0b01 : 0b00;
+      flagState |= state.saveBookmarksSpotify ? 0b10 : 0b00;
+      
+      return flagState;
+    },
+    
+    bookmarkDupeFlagState(state) {
+      // 0b01 = local, 0b10 = spotify
+      let flagState = 0b00;
+      flagState |= state.allowDupesLocal ? 0b01 : 0b00;
+      flagState |= state.allowDupesSpotify ? 0b10 : 0b00;
+      
+      return flagState;
+    },
+  },
 };
