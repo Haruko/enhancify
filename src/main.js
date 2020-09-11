@@ -34,7 +34,7 @@ async function handleHotReload(event) {
         } catch (error) {
           router.push('/');
         }
-      } else {
+      } else if (router.currentRoute.fullPath !== '/') {
         router.push('/');
       }
     }
