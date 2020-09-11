@@ -276,38 +276,13 @@ export default {
           (state.lastBookmarkedFlagState & 0b10) === 0)
       ) {
         try {
-          if (typeof rootState.auth.user_id === 'undefined') {
-            await dispatch('getUserId');
-          }
-
-          const userId = rootState.auth.user_id;
-
-          // Check if playlist exists
-          const playlistExists = await dispatch('checkIfPlaylistExists', rootState.config.spotifyPlaylistId);
-
-          if (!playlistExists) {
-            // Create it
-            const playlistId = await dispatch('createPlaylist', userId);
-
-            await dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: playlistId });
-          }
-
-          const playlistId = rootState.config.spotifyPlaylistId;
-
-          // Check if following playlist because deleting is the same as unfollowing
-          const following = await dispatch('checkIfFollowingPlaylist', { playlistId: playlistId, userId: userId });
-
-          if (!following) {
-            // Follow it
-            await dispatch('followPlaylist', playlistId);
-          }
-
+          const { playlistId, created } = await dispatch('ensurePlaylist');
 
           let shouldWrite = true;
 
           // Check for duplicate
           // We can skip this if we had to create the playlist
-          if (playlistExists && !(bookmarkDupeFlagState & 0b10)) {
+          if (!created && !(bookmarkDupeFlagState & 0b10)) {
             const track = await dispatch('findTrackInPlaylist', { playlistId: playlistId, trackId: state.nowPlayingData.item.id });
             shouldWrite = !track;
           }
@@ -338,9 +313,47 @@ export default {
       commit('SET_NOWPLAYING_PROP', { prop: 'currentlyBookmarking', value: false });
     },
 
-    // Check if it exists
-    async checkIfPlaylistExists({ rootGetters }, playlistId) {
+    // Creates playlist if it doesn't exist, follows if it's not followed, and returns { playlistId, created }
+    async ensurePlaylist({ rootState, dispatch }) {
+      if (typeof rootState.auth.user_id === 'undefined') {
+        await dispatch('getUserId');
+      }
 
+      // Check if playlist exists
+      let playlistId = await dispatch('getExistingPlaylist', rootState.config.spotifyPlaylistId);
+      let created = false;
+
+      if (typeof playlistId === 'undefined') {
+        // Create it
+        playlistId = await dispatch('createPlaylist', rootState.auth.user_id);
+        created = true;
+      }
+
+      if (typeof rootState.config.spotifyPlaylistId === 'undefined' || created) {
+        await dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: playlistId });
+      }
+
+      // Check if following playlist because deleting is the same as unfollowing
+      const following = await dispatch('checkIfFollowingPlaylist', { playlistId: playlistId, userId: rootState.auth.user_id });
+
+      if (!following) {
+        // Follow it
+        await dispatch('followPlaylist', playlistId);
+      }
+
+      return { playlistId, created };
+    },
+
+    // Check if it exists by id
+    // If not found, check by name
+    // If not found, return undefined
+    async getExistingPlaylist({ rootState, rootGetters }, playlistId) {
+      // Get playlist ID from state if stored
+      if (typeof playlistId === 'undefined' && typeof rootState.config.spotifyPlaylistId !== 'undefined') {
+        playlistId = rootState.config.spotifyPlaylistId;
+      }
+
+      // First check by ID since it's more lightweight
       if (typeof playlistId !== 'undefined') {
         const queryUrl = `https://api.spotify.com/v1/playlists/${playlistId}?fields=id`;
 
@@ -348,13 +361,37 @@ export default {
           await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
           const response = await axios.get(queryUrl, { headers: rootGetters.authHeader, });
 
-          return typeof response.data.id !== 'undefined';
+          if (typeof response.data !== 'undefined') {
+            return response.data.id;
+          }
+
+          // Otherwise continue to checking the name
         } catch (error) {
-          return undefined;
+          // Do nothing because we can still search by name
         }
-      } else {
-        return undefined;
       }
+
+      // If still not found or we had an error, check by name
+      const limit = 50; // Max limit possible
+      let nextUrl = `https://api.spotify.com/v1/me/playlists?offset=0&limit=${limit}`;
+
+      do {
+        await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
+        const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
+
+        // Check if it exists
+        console.log(response.data.items.map((p) => p.name))
+        const playlist = response.data.items.find(p => p.name === rootState.config.spotifyPlaylistName);
+
+        if (typeof playlist !== 'undefined') {
+          return playlist.id;
+        }
+
+        nextUrl = response.data.next;
+      } while (nextUrl !== null);
+
+      // Didn't find it
+      return undefined;
     },
 
     async createPlaylist({ rootState, rootGetters }, userId) {
@@ -434,8 +471,10 @@ export default {
     },
 
     // preference = 'desktop' or 'browser'
-    async openBookmarksPlaylist({ rootState }, preference='desktop') {
-      ipcRenderer.send('open-playlist', rootState.config.spotifyPlaylistId, preference);
+    async openBookmarksPlaylist({ dispatch }, preference = 'desktop') {
+      const { playlistId } = await dispatch('ensurePlaylist');
+
+      ipcRenderer.send('open-playlist', playlistId, preference);
     },
   },
 
