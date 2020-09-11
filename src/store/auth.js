@@ -17,8 +17,6 @@ export default {
       'playlist-modify-private'
     ].join(' '),
 
-    loadedConfig: false,
-
     state: pkce.createChallenge(),
     codePair: pkce.create(),
 
@@ -104,11 +102,7 @@ export default {
         await dispatch('storeRefreshToken');
         await dispatch('getUserId');
 
-        if (!state.loadedConfig) {
-          await dispatch('loadConfig', state.user_id);
-          commit('SET_AUTH_PROP', { prop: 'loadedConfig', value: true });
-        }
-
+        // return true;
         return true;
       } else {
         // No success
@@ -118,7 +112,6 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'expires_in', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'user_id', value: undefined });
-        commit('SET_AUTH_PROP', { prop: 'loadedConfig', value: false });
 
         return false;
       }
