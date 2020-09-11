@@ -380,7 +380,6 @@ export default {
         const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
 
         // Check if it exists
-        console.log(response.data.items.map((p) => p.name))
         const playlist = response.data.items.find(p => p.name === config.bookmarks.playlistName);
 
         if (typeof playlist !== 'undefined') {
