@@ -11,25 +11,23 @@
           </VBtn>
         </VCol>
       </VRow>
-      <VExpansionPanels flat accordion hover class="mt-2">
-        <VExpansionPanel class="help-panel">
-          <VExpansionPanelHeader class="panel-header">
-            Help
-          </VExpansionPanelHeader>
-          <VExpansionPanelContent color="#00000000">
-            To create file formats, use tokens from the following list:
-            <ul style="columns: 2">
-              <li v-for="(value, key) in $store.getters.nowPlayingFormatted" :key="key">
-                {{ config.labels.startTag }}{{ key }}{{ config.labels.endTag }}
-              </li>
-            </ul>
-            These can be used anywhere in the format text and case does not matter.
-          </VExpansionPanelContent>
-        </VExpansionPanel>
-      </VExpansionPanels>
       <VRow>
         <VCol>
           <FileFormatItem v-for="(format, index) in fileFormats" :key="index" :ref="`FileFormatItem_${index}`" v-model="fileFormats[index]" @save="updateFileFormat($event, index);" @remove="removeFileFormat(index);" />
+        </VCol>
+      </VRow>
+      <VRow no-gutters align="center">
+        <VCol>
+          <ul>
+            <li>To create file formats, use tokens from the following list:
+              <ul style="columns: 2">
+                <li v-for="(value, key) in $store.getters.nowPlayingFormatted" :key="key">
+                  {{ config.labels.startTag }}{{ key }}{{ config.labels.endTag }}
+                </li>
+              </ul>
+            </li>
+            <li>These can be used anywhere in the format text and case does not matter.</li>
+          </ul>
         </VCol>
       </VRow>
     </VCol>

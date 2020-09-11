@@ -27,6 +27,13 @@
             <VBtn color="primary" small @click.native="openBookmarksDir">Open directory</VBtn>
           </VCol>
         </VRow>
+        <VRow no-gutters align="center" class="mt-2">
+          <VCol>
+            <ul>
+              <li>File will open in your computer's default program for that file extension.</li>
+            </ul>
+          </VCol>
+        </VRow>
       </div>
       <div class="panel">
         <VRow no-gutters align="center">
@@ -44,6 +51,15 @@
           <VCol cols="6">
             <VBtn color="primary" small @click.native="openPlaylist('desktop')">Open on desktop</VBtn>
             <VBtn color="primary" small @click.native="openPlaylist('browser')">Open in browser</VBtn>
+          </VCol>
+        </VRow>
+        <VRow no-gutters align="center" class="mt-2">
+          <VCol>
+            <ul>
+              <li>Feel free to change the playlist name and description in Spotify. It will still work!</li>
+              <li>If you accidentally delete your playlist, click one of the Open buttons above and it will automatically be restored.</li>
+              <li>If you want to completely start over, delete the playlist in Spotify and click the Create New Playlist button to lose all knowledge of previous playlist.</li>
+            </ul>
           </VCol>
         </VRow>
       </div>
