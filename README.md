@@ -1,5 +1,5 @@
 # Enhancify
-Records Spotify now playing data for streaming and allows bookmarking of currently playing tracks with an easy to use interface.
+Records current track data from Spotify for streaming and allows bookmarking of currently playing tracks with an easy to use interface.
 
 #### Can this still be useful even if I don't stream?
 Yes! Current functionality allows you to bookmark the currently playing song to a playlist on Spotify or a local file on your computer. You can quickly make lists of songs with a simple hotkey!
