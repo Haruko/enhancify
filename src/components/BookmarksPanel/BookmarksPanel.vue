@@ -34,7 +34,7 @@
             <VSwitch v-model="saveBookmarksSpotify" dense hide-details="true" label="Save to Spotify playlist"></VSwitch>
           </VCol>
           <VCol cols="6">
-            <VBtn color="primary" small @click.native="openPlaylist('desktop')">Open on desktop</VBtn>
+            <VBtn color="primary" small @click.native="createPlaylist">Create new playlist</VBtn>
           </VCol>
         </VRow>
         <VRow no-gutters align="center">
@@ -42,6 +42,7 @@
             <VSwitch v-model="allowDupesSpotify" :disabled="!saveBookmarksSpotify" dense hide-details="true" label="Allow duplicates"></VSwitch>
           </VCol>
           <VCol cols="6">
+            <VBtn color="primary" small @click.native="openPlaylist('desktop')">Open on desktop</VBtn>
             <VBtn color="primary" small @click.native="openPlaylist('browser')">Open in browser</VBtn>
           </VCol>
         </VRow>
@@ -136,7 +137,16 @@ export default {
     openBookmarksDir() {
       ipcRenderer.send('open-directory', 'bookmarks');
     },
-    
+
+    async createPlaylist() {
+      if (typeof this.$store.state.auth.user_id === 'undefined') {
+        await this.$store.dispatch('getUserId');
+      }
+      
+      const playlistId = await this.$store.dispatch('createPlaylist', this.$store.state.auth.user_id);
+      await this.$store.dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: playlistId });
+    },
+
     async openPlaylist(preference) {
       await this.$store.dispatch('openBookmarksPlaylist', preference);
     },
