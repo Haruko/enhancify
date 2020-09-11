@@ -3,7 +3,7 @@
     <VCol>
       <VRow no-gutters align="center">
         <VCol cols="6">
-          <VTextField :value="hotkey" label="Hotkey" class="mr-3" dense disabled></VTextField>
+          <VTextField :value="hotkey" label="Hotkey" class="mr-3" dense hide-details="true" disabled></VTextField>
         </VCol>
         <VCol cols="6">
           <VBtn v-if="!recordingHotkey" color="primary" small @click.native="startRecordingHotkeys">Edit</VBtn>
