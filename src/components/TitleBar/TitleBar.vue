@@ -1,21 +1,23 @@
 <template>
-  <div class="title-bar">
-    <div class="title-label">
+  <VRow no-gutters class="title-bar">
+    <VCol class="title-label flex-grow-0 flex-shrink-1">
       Enhancify{{ nowPlayingText ? ` - ${nowPlayingText}` : '' }}
-    </div>
-    <div class="window-controls">
-      <VIcon dense dark class="minimize-window" @click.native="minimizeWindow">mdi-window-minimize</VIcon>
-      <VIcon dense dark class="maximize-window" @click.native="maximizeWindow">mdi-window-maximize</VIcon>
-      <VIcon dense dark class="close-window" @click.native="closeWindow">mdi-window-close</VIcon>
-    </div>
-  </div>
+    </VCol>
+    <VCol class="window-controls flex-grow-1 flex-shrink-0">
+      <VRow no-gutters justify="end">
+        <VIcon dense dark class="minimize-window" @click.native="minimizeWindow">mdi-window-minimize</VIcon>
+        <VIcon dense dark class="maximize-window" @click.native="maximizeWindow">mdi-window-maximize</VIcon>
+        <VIcon dense dark class="close-window" @click.native="closeWindow">mdi-window-close</VIcon>
+      </VRow>
+    </VCol>
+  </VRow>
 </template>
 <script>
 import { ipcRenderer } from 'electron';
 
 export default {
   name: 'TitleBar',
-  
+
   computed: {
     nowPlayingText() {
       return this.$store.state.nowplaying.nowPlayingText;
