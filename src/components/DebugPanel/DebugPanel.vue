@@ -8,8 +8,13 @@
           <VBtn class="width-3" small :color="typeof refreshToken === 'undefined' ? 'error' : 'primary'" :disabled="!allowLoadRefreshToken" @click.native="reloadRefreshToken">Reload Refresh Token</VBtn>
         </VCol>
       </VRow>
-      <VRow no-gutters align="center" class="mt-2">
-        <VCol>
+      <VRow no-gutters align="start" class="mt-2">
+        <VCol class="flex-grow-0 flex-shrink-1">
+          <VBtn class="square ml-2" color="info" small dense @click.native="showHelp = !showHelp">
+            <VIcon dense small>mdi-help-circle-outline</VIcon>
+          </VBtn>
+        </VCol>
+        <VCol v-if="showHelp" class="help-panel">
           <ul>
             <li>Feel free to use these if functions aren't working.</li>
             <li>If these options don't help:
@@ -20,7 +25,11 @@
                 <li>Restart the application and re-authorize</li>
               </ol>
             </li>
-            <li>If that doesn't work then please submit a bug report here: <a @click.prevent="openGithub">{{ config.other.githubIssues }}</a><VBtn class="square ml-2" color="info" x-small dense @click.native="copyGithub"><VIcon dense x-small>mdi-content-copy</VIcon></VBtn></li>
+            <li>If that doesn't work then please submit a bug report here: <a @click.prevent="openGithub">{{ config.other.githubIssues }}</a>
+              <VBtn class="square ml-2" color="info" x-small dense @click.native="copyGithub">
+                <VIcon dense x-small>mdi-content-copy</VIcon>
+              </VBtn>
+            </li>
           </ul>
         </VCol>
       </VRow>
@@ -37,7 +46,8 @@ export default {
 
   data() {
     return {
-      config: config,
+      config,
+      showHelp: false,
 
       allowAuthRefresh: true,
       allowLoadRefreshToken: true,

@@ -27,8 +27,13 @@
             <VBtn class="width-2" color="primary" small @click.native="openBookmarksDir">Open directory</VBtn>
           </VCol>
         </VRow>
-        <VRow no-gutters align="center" class="mt-2">
-          <VCol>
+        <VRow no-gutters align="start" class="mt-2">
+          <VCol class="flex-grow-0 flex-shrink-1">
+            <VBtn class="square ml-2" color="info" small dense @click.native="showHelp.local = !showHelp.local">
+              <VIcon dense small>mdi-help-circle-outline</VIcon>
+            </VBtn>
+          </VCol>
+          <VCol v-if="showHelp.local" class="help-panel">
             <ul>
               <li>File will open in your computer's default program for that file extension.</li>
             </ul>
@@ -53,8 +58,13 @@
             <VBtn class="width-2" color="primary" small @click.native="openPlaylist('browser')">Open in browser</VBtn>
           </VCol>
         </VRow>
-        <VRow no-gutters align="center" class="mt-2">
-          <VCol>
+        <VRow no-gutters align="start" class="mt-2">
+          <VCol class="flex-grow-0 flex-shrink-1">
+            <VBtn class="square ml-2" color="info" small dense @click.native="showHelp.spotify = !showHelp.spotify">
+              <VIcon dense small>mdi-help-circle-outline</VIcon>
+            </VBtn>
+          </VCol>
+          <VCol v-if="showHelp.spotify" class="help-panel">
             <ul>
               <li>Feel free to change the playlist name and description in Spotify. It will still work!</li>
               <li>If you accidentally delete your playlist, click one of the Open buttons above and it will automatically be restored.</li>
@@ -79,6 +89,10 @@ export default {
 
   data() {
     return {
+      showHelp: {
+        local: false,
+        spotify: false,
+      },
       recordingHotkey: false,
     };
   },
@@ -158,7 +172,7 @@ export default {
       if (typeof this.$store.state.auth.user_id === 'undefined') {
         await this.$store.dispatch('getUserId');
       }
-      
+
       const playlistId = await this.$store.dispatch('createPlaylist', this.$store.state.auth.user_id);
       await this.$store.dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: playlistId });
     },

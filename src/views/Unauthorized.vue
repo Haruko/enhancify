@@ -11,7 +11,7 @@
               Need to authorize with Spotify!
             </VCol>
             <VCol class="ml-3">
-              <VBtn color="primary" @click.native="authorize()">Authorize</VBtn>
+              <VBtn class="width-1" color="primary" small @click.native="authorize()">Authorize</VBtn>
             </VCol>
           </VRow>
         </VExpansionPanelContent>

@@ -18,8 +18,13 @@
           <VBtn class="width-3" color="primary" small @click.native="openOutputDir">Open output directory</VBtn>
         </VCol>
       </VRow>
-      <VRow no-gutters align="center" class="mt-2">
-        <VCol>
+      <VRow no-gutters align="start" class="mt-2">
+        <VCol class="flex-grow-0 flex-shrink-1">
+          <VBtn class="square ml-2" color="info" small dense @click.native="showHelp = !showHelp">
+            <VIcon dense small>mdi-help-circle-outline</VIcon>
+          </VBtn>
+        </VCol>
+        <VCol v-if="showHelp" class="help-panel">
           <ul>
             <li>To create file formats, use tokens from the following list:
               <ul style="columns: 2">
@@ -62,6 +67,7 @@ export default {
   data() {
     return {
       config,
+      showHelp: false,
     };
   },
 
