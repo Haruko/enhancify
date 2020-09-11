@@ -2,9 +2,6 @@
   <VRow no-gutters class="panel">
     <VCol>
       <VRow no-gutters>
-        <VCol>
-          <VBtn color="primary" small @click.native="openOutputDir">Open output directory</VBtn>
-        </VCol>
         <VCol class="text-right">
           <VBtn color="primary" small @click.native="addFileFormat">
             <VIcon dense>mdi-plus</VIcon> Add new file format
@@ -13,10 +10,15 @@
       </VRow>
       <VRow>
         <VCol>
-          <FileFormatItem v-for="(format, index) in fileFormats" :key="index" :ref="`FileFormatItem_${index}`" v-model="fileFormats[index]" @save="updateFileFormat($event, index);" @remove="removeFileFormat(index);" />
+          <FileFormatItem v-for="(format, index) in fileFormats" :key="index" :ref="`FileFormatItem_${index}`" v-model="fileFormats[index]" @save="updateFileFormat($event, index);" @remove="removeFileFormat(index);" :class="index === fileFormats.length - 1 ? '' : 'mb-3'" />
         </VCol>
       </VRow>
-      <VRow no-gutters align="center">
+      <VRow no-gutters>
+        <VCol class="text-right">
+          <VBtn color="primary" small @click.native="openOutputDir">Open output directory</VBtn>
+        </VCol>
+      </VRow>
+      <VRow no-gutters align="center" class="mt-2">
         <VCol>
           <ul>
             <li>To create file formats, use tokens from the following list:

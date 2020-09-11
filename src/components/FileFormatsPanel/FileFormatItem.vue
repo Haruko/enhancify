@@ -1,7 +1,7 @@
 <template>
   <VForm v-model="valid" ref="form" @submit.prevent="save">
     <input type="submit" hidden />
-    <VRow no-gutters class="panel mb-3" align="center">
+    <VRow no-gutters class="panel" align="center">
       <VCol cols="3" class="flex-grow-1 flex-shrink-0 mr-2">
         <VTextField v-model="filename" :rules="filenameRules" label="Filename" hide-details="true" dense required></VTextField>
       </VCol>
