@@ -7,7 +7,7 @@
         </VCol>
       </VRow>
       <VRow no-gutters align="center" justify="end">
-        <VBtn color="primary" small @click.native="openConfigDir">Open Config Directory</VBtn>
+        <VBtn class="width-3" color="primary" small @click.native="openConfigDir">Open Config Directory</VBtn>
       </VRow>
     </VCol>
   </VRow>

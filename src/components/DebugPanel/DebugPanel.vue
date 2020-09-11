@@ -1,11 +1,11 @@
 <template>
   <VRow no-gutters class="panel">
     <VCol>
-      <VRow no-gutters align="center" class="mt-2">
+      <VRow no-gutters align="center" class="mt-2 text-right">
         <VCol>
-          <VBtn color="primary" small @click.native="forceAuthRefresh" :disabled="!allowAuthRefresh || typeof refreshToken === 'undefined'">Force Auth Refresh</VBtn>
-          <VBtn color="primary" small @click.native="reloadConfig">Reload Config</VBtn>
-          <VBtn small :color="typeof refreshToken === 'undefined' ? 'error' : 'primary'" :disabled="!allowLoadRefreshToken" @click.native="reloadRefreshToken">Reload Refresh Token</VBtn>
+          <VBtn class="width-2" color="primary" small @click.native="reloadConfig">Reload Config</VBtn>
+          <VBtn class="width-3" color="primary" small @click.native="forceAuthRefresh" :disabled="!allowAuthRefresh || typeof refreshToken === 'undefined'">Force Auth Refresh</VBtn>
+          <VBtn class="width-3" small :color="typeof refreshToken === 'undefined' ? 'error' : 'primary'" :disabled="!allowLoadRefreshToken" @click.native="reloadRefreshToken">Reload Refresh Token</VBtn>
         </VCol>
       </VRow>
       <VRow no-gutters align="center" class="mt-2">

@@ -3,7 +3,7 @@
     <VCol>
       <VRow no-gutters>
         <VCol class="text-right">
-          <VBtn color="primary" small @click.native="addFileFormat">
+          <VBtn class="width-3" color="primary" small @click.native="addFileFormat">
             <VIcon dense>mdi-plus</VIcon> Add new file format
           </VBtn>
         </VCol>
@@ -15,7 +15,7 @@
       </VRow>
       <VRow no-gutters>
         <VCol class="text-right">
-          <VBtn color="primary" small @click.native="openOutputDir">Open output directory</VBtn>
+          <VBtn class="width-3" color="primary" small @click.native="openOutputDir">Open output directory</VBtn>
         </VCol>
       </VRow>
       <VRow no-gutters align="center" class="mt-2">

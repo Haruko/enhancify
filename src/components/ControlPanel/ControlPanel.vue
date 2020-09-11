@@ -2,13 +2,13 @@
   <VRow no-gutters class="panel">
     <VCol>
       <VRow no-gutters>
-        <VBtn color="info" small @click.native="deAuth">Log Out</VBtn>
+        <VBtn class="width-1" color="info" small @click.native="deAuth">Log Out</VBtn>
       </VRow>
     </VCol>
     <VCol>
       <VRow no-gutters justify="end">
-        <VBtn v-if="canBookmark" color="info" small @click.native="bookmark">Bookmark</VBtn>
-        <VBtn :color="running ? 'error': 'primary'" small @click.native="startStop">{{ running ? 'Stop' : 'Start' }}</VBtn>
+        <VBtn v-if="canBookmark" class="width-1" color="info" small @click.native="bookmark">Bookmark</VBtn>
+        <VBtn class="width-1" :color="running ? 'error': 'primary'" small @click.native="startStop">{{ running ? 'Stop' : 'Start' }}</VBtn>
       </VRow>
     </VCol>
   </VRow>

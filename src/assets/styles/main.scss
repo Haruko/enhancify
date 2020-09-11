@@ -21,7 +21,6 @@ html {
 
   &>.content>.container {
     padding-right: 0.5rem !important;
-    /*padding-bottom: 0rem !important;*/
   }
 }
 
@@ -160,6 +159,21 @@ html {
 
 .v-btn {
   margin: 0.25rem;
+  
+  &.width-1 {
+    min-width: 6rem !important;
+    max-width: 6rem !important;
+  }
+
+  &.width-2 {
+    min-width: 9.5rem !important;
+    max-width: 9.5rem !important;
+  }
+
+  &.width-3 {
+    min-width: 13rem !important;
+    max-width: 13rem !important;
+  }
 
   &.square {
     padding: 0rem !important;
