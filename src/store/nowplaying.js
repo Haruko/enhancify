@@ -394,7 +394,7 @@ export default {
       return undefined;
     },
 
-    async createPlaylist({ rootState, rootGetters }, userId) {
+    async createPlaylist({ rootGetters }, userId) {
       const playlistData = {
         name: config.bookmarks.playlistName,
         public: false,

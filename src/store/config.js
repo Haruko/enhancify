@@ -3,8 +3,6 @@ const json5 = require('json5');
 import { ipcRenderer } from 'electron';
 import Vue from 'vue'
 
-import config from 'json5-loader!@/config.json5';
-
 export default {
   state: {
     // Editable by user in frontend
