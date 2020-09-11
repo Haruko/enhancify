@@ -164,6 +164,11 @@ html {
   &.square {
     padding: 0rem !important;
 
+    &.v-size--x-small {
+      height: 1.43rem !important;
+      min-width: 1.43rem !important;
+    }
+
     &.v-size--small {
       height: 2rem !important;
       min-width: 2rem !important;
@@ -184,8 +189,4 @@ html {
       min-width: 3.71rem !important;
     }
   }
-}
-
-.v-label {
-  /*background-color: red;*/
 }

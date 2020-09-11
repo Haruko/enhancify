@@ -297,6 +297,14 @@ export function initIPC(win) {
 
     }
   });
+  
+  ipcMain.on('open-url', async (event, url) => {
+    try {
+      await shell.openExternal(url);
+    } catch (error) {
+
+    }
+  });
 
 
 

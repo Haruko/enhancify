@@ -20,7 +20,7 @@
                 <li>Restart the application and re-authorize</li>
               </ol>
             </li>
-            <li>If that doesn't work then please submit a bug report here: https://github.com/Haruko/enhancify/issues</li>
+            <li>If that doesn't work then please submit a bug report here: <a @click.prevent="openGithub">{{ config.other.githubIssues }}</a><VBtn class="square ml-2" color="info" x-small dense @click.native="copyGithub"><VIcon dense x-small>mdi-content-copy</VIcon></VBtn></li>
           </ul>
         </VCol>
       </VRow>
@@ -28,6 +28,8 @@
   </VRow>
 </template>
 <script>
+import { ipcRenderer, clipboard } from 'electron';
+
 import config from 'json5-loader!@/config.json5';
 
 export default {
@@ -68,6 +70,14 @@ export default {
       }
 
       this.allowLoadRefreshToken = true;
+    },
+
+    async openGithub() {
+      ipcRenderer.send('open-url', config.other.githubIssues);
+    },
+
+    async copyGithub() {
+      clipboard.writeText(config.other.githubIssues);
     },
   },
 }

@@ -59,4 +59,8 @@
       authErrorUrl: 'app://./index.html#/',
     }
   },
+  other: {
+    github: 'https://github.com/Haruko/enhancify',
+    githubIssues: 'https://github.com/Haruko/enhancify/issues',
+  },
 }
