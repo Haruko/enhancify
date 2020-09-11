@@ -381,7 +381,7 @@ export default {
 
         // Check if it exists
         console.log(response.data.items.map((p) => p.name))
-        const playlist = response.data.items.find(p => p.name === rootState.config.spotifyPlaylistName);
+        const playlist = response.data.items.find(p => p.name === config.bookmarks.playlistName);
 
         if (typeof playlist !== 'undefined') {
           return playlist.id;
@@ -396,7 +396,7 @@ export default {
 
     async createPlaylist({ rootState, rootGetters }, userId) {
       const playlistData = {
-        name: rootState.config.spotifyPlaylistName,
+        name: config.bookmarks.playlistName,
         public: false,
         description: config.bookmarks.playlistDescription,
       };
