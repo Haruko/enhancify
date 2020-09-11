@@ -18,7 +18,7 @@ html {
   height: 100%;
   overflow-x: hidden !important;
   overflow-y: scroll !important;
-  
+
   &>.content>.container {
     padding-right: 0.5rem !important;
     /*padding-bottom: 0rem !important;*/
@@ -53,7 +53,7 @@ html {
 
 ::-webkit-scrollbar-thumb {
   background-color: #FFFFFF10;
-  
+
   border-radius: 5px;
 
   &:hover {
@@ -71,27 +71,45 @@ html {
   background-color: var(--v-primary-base);
   -webkit-app-region: drag;
   overflow: hidden !important;
-  display: flex;
-
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.2rem;
-  padding-bottom: 0.2rem;
-  height: 1.8rem;
-  
   border-bottom: 1px solid var(--v-background-base);
+
+  &>.title-label {
+    padding-left: 0.5rem;
+    padding-top: 0.15rem;
+    height: 1.7rem;
+  }
+
+  &>.window-controls {
+
+    /* All the window controls */
+    &>.row>.col {
+      -webkit-app-region: no-drag;
+
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      padding-top: 0.05rem;
+      height: 1.7rem;
+      
+      &>.mdi:before {
+        font-weight: 100;
+      }
+
+      &:hover {
+        background-color: var(--v-primary-lighten1);
+        
+        transition: background-color 0.4s cubic-bezier(0.6, 0.0, 0.0, 1.0);
+      }
+    }
+
+    /* Close button */
+    &>.row>.close-window {
+      &:hover {
+        background-color: var(--v-error-base);
+      }
+    }
+  }
 }
 
-.title-label {
-  flex: 1;
-}
-
-.minimize-window,
-.maximize-window,
-.close-window {
-  -webkit-app-region: no-drag;
-  margin-left: 0.875rem;
-}
 
 
 

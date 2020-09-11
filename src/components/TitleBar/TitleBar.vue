@@ -5,9 +5,15 @@
     </VCol>
     <VCol class="window-controls flex-grow-1 flex-shrink-0">
       <VRow no-gutters justify="end">
-        <VIcon dense dark class="minimize-window" @click.native="minimizeWindow">mdi-window-minimize</VIcon>
-        <VIcon dense dark class="maximize-window" @click.native="maximizeWindow">mdi-window-maximize</VIcon>
-        <VIcon dense dark class="close-window" @click.native="closeWindow">mdi-window-close</VIcon>
+        <VCol class="minimize-window flex-grow-0 flex-shrink-1">
+          <VIcon dense dark @click.native="minimizeWindow">mdi-minus</VIcon>
+        </VCol>
+        <VCol class="maximize-window flex-grow-0 flex-shrink-1">
+          <VIcon dense dark @click.native="maximizeWindow">mdi-crop-square</VIcon>
+        </VCol>
+        <VCol class="close-window flex-grow-0 flex-shrink-1">
+          <VIcon dense dark @click.native="closeWindow">mdi-window-close</VIcon>
+        </VCol>
       </VRow>
     </VCol>
   </VRow>
