@@ -1,7 +1,7 @@
 <template>
   <VRow no-gutters class="panel">
     <VCol>
-      <VRow no-gutters align="center">
+      <VRow no-gutters align="center" class="panel mb-3">
         <VCol cols="6">
           <VTextField :value="hotkey" label="Hotkey" class="mr-3" dense hide-details="true" disabled></VTextField>
         </VCol>
@@ -10,35 +10,42 @@
           <VBtn v-if="recordingHotkey" color="error" small @click.native="stopRecordingHotkeys">Stop</VBtn>
         </VCol>
       </VRow>
-      <VRow no-gutters align="center">
-        <VCol cols="6">
-          <VSwitch v-model="saveBookmarksLocal" dense hide-details="true" label="Save to local file"></VSwitch>
-        </VCol>
-        <VCol cols="6">
-          <VBtn color="primary" small @click.native="openBookmarksFile">Open bookmarks file</VBtn>
-        </VCol>
-      </VRow>
-      <VRow no-gutters align="center">
-        <VCol class="offset-sm-1" cols="5">
-          <VSwitch v-model="allowDupesLocal" :disabled="!saveBookmarksLocal" dense hide-details="true" label="Allow duplicates"></VSwitch>
-        </VCol>
-        <VCol cols="6">
-          <VBtn color="primary" small @click.native="openBookmarksDir">Open bookmarks directory</VBtn>
-        </VCol>
-      </VRow>
-      <VRow no-gutters align="center">
-        <VCol cols="6">
-          <VSwitch v-model="saveBookmarksSpotify" dense hide-details="true" label="Save to Spotify playlist"></VSwitch>
-        </VCol>
-        <VCol cols="6">
-          <VBtn color="primary" small @click.native="openPlaylist">Open bookmarks playlist</VBtn>
-        </VCol>
-      </VRow>
-      <VRow no-gutters align="center">
-        <VCol class="offset-sm-1" cols="5">
-          <VSwitch v-model="allowDupesSpotify" :disabled="!saveBookmarksSpotify" dense hide-details="true" label="Allow duplicates"></VSwitch>
-        </VCol>
-      </VRow>
+      <div class="panel mb-3">
+        <VRow no-gutters align="center">
+          <VCol cols="6">
+            <VSwitch v-model="saveBookmarksLocal" dense hide-details="true" label="Save to local file"></VSwitch>
+          </VCol>
+          <VCol cols="6">
+            <VBtn color="primary" small @click.native="openBookmarksFile">Open file</VBtn>
+          </VCol>
+        </VRow>
+        <VRow no-gutters align="center">
+          <VCol class="offset-sm-1" cols="5">
+            <VSwitch v-model="allowDupesLocal" :disabled="!saveBookmarksLocal" dense hide-details="true" label="Allow duplicates"></VSwitch>
+          </VCol>
+          <VCol cols="6">
+            <VBtn color="primary" small @click.native="openBookmarksDir">Open directory</VBtn>
+          </VCol>
+        </VRow>
+      </div>
+      <div class="panel">
+        <VRow no-gutters align="center">
+          <VCol cols="6">
+            <VSwitch v-model="saveBookmarksSpotify" dense hide-details="true" label="Save to Spotify playlist"></VSwitch>
+          </VCol>
+          <VCol cols="6">
+            <VBtn color="primary" small @click.native="openPlaylist('desktop')">Open on desktop</VBtn>
+          </VCol>
+        </VRow>
+        <VRow no-gutters align="center">
+          <VCol class="offset-sm-1" cols="5">
+            <VSwitch v-model="allowDupesSpotify" :disabled="!saveBookmarksSpotify" dense hide-details="true" label="Allow duplicates"></VSwitch>
+          </VCol>
+          <VCol cols="6">
+            <VBtn color="primary" small @click.native="openPlaylist('browser')">Open in browser</VBtn>
+          </VCol>
+        </VRow>
+      </div>
     </VCol>
   </VRow>
 </template>
@@ -130,8 +137,8 @@ export default {
       ipcRenderer.send('open-directory', 'bookmarks');
     },
     
-    async openPlaylist() {
-      await this.$store.dispatch('openBookmarksPlaylist');
+    async openPlaylist(preference) {
+      await this.$store.dispatch('openBookmarksPlaylist', preference);
     },
 
     startRecordingHotkeys() {
