@@ -30,6 +30,7 @@ export default {
     updateTimeoutID: undefined,
     secondsTimeoutID: undefined,
 
+    desktopInstalled: true,
     bookmarkCooldown: 1000,
     currentlyBookmarking: false,
     lastBookmarkedTime: undefined,

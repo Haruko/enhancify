@@ -56,7 +56,14 @@
             <VSwitch v-model="allowDupesSpotify" :disabled="!saveBookmarksSpotify" dense hide-details="true" label="Allow duplicates"></VSwitch>
           </VCol>
           <VCol class="text-right flex-grow-1 flex-shrink-0">
-            <VBtn class="width-2" color="primary" small @click.native="openPlaylist('desktop')">Open on desktop</VBtn>
+            <VTooltip bottom :disabled="allowDesktop" color="error" nudge-bottom="5" transition="scale-transition">
+              <template v-slot:activator="{ on }">
+                <span v-on="on">
+                  <VBtn :disabled="!allowDesktop" class="width-2" color="primary" small @click.native="openPlaylist('desktop')">Open on desktop</VBtn>
+                </span>
+              </template>
+              <span>Install Spotify to use this function</span>
+            </VTooltip>
             <VBtn class="width-2" color="primary" small @click.native="openPlaylist('browser')">Open in browser</VBtn>
           </VCol>
         </VRow>
@@ -145,6 +152,16 @@ export default {
     hotkey: {
       get() {
         return this.$store.state.config.hotkey;
+      },
+
+      set() {
+
+      },
+    },
+
+    allowDesktop: {
+      get() {
+        return this.$store.state.nowplaying.desktopInstalled;
       },
 
       set() {

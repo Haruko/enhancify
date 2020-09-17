@@ -4,6 +4,8 @@ import { app, protocol, BrowserWindow, globalShortcut } from 'electron';
 import { initIPC } from './ipc.js';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+const commandExists = require('command-exists');
+
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 const hasLock = app.requestSingleInstanceLock();
@@ -37,20 +39,30 @@ function createWindow() {
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
       devTools: isDevelopment,
     }
-  })
+  });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+    if (!process.env.IS_TEST) {
+      win.webContents.openDevTools();
+    }
   } else {
-    createProtocol('app')
+    createProtocol('app');
     // Load the index.html when not in development
-    win.loadURL('app://./index.html')
+    win.loadURL('app://./index.html');
   }
 
-  win.once('ready-to-show', () => {
-    win.webContents.send('window-resize', width, height);
+  win.once('ready-to-show', async () => {
+    const desktopExists = await commandExists('spotify');
+
+    win.once('show', async () => {
+      win.webContents.send('window-resize', width, height);
+      if (!desktopExists) {
+        win.webContents.send('disable-desktop');
+      }
+    });
+
     win.show();
   });
 
