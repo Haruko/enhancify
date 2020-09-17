@@ -14,24 +14,26 @@
             <VIcon dense small>mdi-help-circle-outline</VIcon>
           </VBtn>
         </VCol>
-        <VCol v-if="showHelp" class="help-panel">
-          <ul>
-            <li>Feel free to use these if functions aren't working.</li>
-            <li>If these options don't help:
-              <ol>
-                <li>Open the config directory</li>
-                <li>Close the application</li>
-                <li>Delete the "{{config.filesystem.config.filename}}" and "{{config.filesystem.token.filename}}" files</li>
-                <li>Restart the application and re-authorize</li>
-              </ol>
-            </li>
-            <li>If that doesn't work then please submit a bug report here: <a @click.prevent="openGithub">{{ config.other.githubIssues }}</a>
-              <VBtn class="square ml-2" color="info" x-small dense @click.native="copyGithub">
-                <VIcon dense x-small>mdi-content-copy</VIcon>
-              </VBtn>
-            </li>
-          </ul>
-        </VCol>
+        <v-slide-y-transition origin="top left">
+          <VCol v-show="showHelp" class="help-panel">
+            <ul>
+              <li>Feel free to use these if functions aren't working.</li>
+              <li>If these options don't help:
+                <ol>
+                  <li>Open the config directory</li>
+                  <li>Close the application</li>
+                  <li>Delete the "{{config.filesystem.config.filename}}" and "{{config.filesystem.token.filename}}" files</li>
+                  <li>Restart the application and re-authorize</li>
+                </ol>
+              </li>
+              <li>If that doesn't work then please submit a bug report here: <a @click.prevent="openGithub">{{ config.other.githubIssues }}</a>
+                <VBtn class="square ml-2" color="info" x-small dense @click.native="copyGithub">
+                  <VIcon dense x-small>mdi-content-copy</VIcon>
+                </VBtn>
+              </li>
+            </ul>
+          </VCol>
+        </v-slide-y-transition>
       </VRow>
     </VCol>
   </VRow>

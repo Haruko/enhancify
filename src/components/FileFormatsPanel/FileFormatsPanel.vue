@@ -24,18 +24,20 @@
             <VIcon dense small>mdi-help-circle-outline</VIcon>
           </VBtn>
         </VCol>
-        <VCol v-if="showHelp" class="help-panel">
-          <ul>
-            <li>To create file formats, use tokens from the following list:
-              <ul style="columns: 2">
-                <li v-for="(value, key) in $store.getters.nowPlayingFormatted" :key="key">
-                  {{ config.labels.startTag }}{{ key }}{{ config.labels.endTag }}
-                </li>
-              </ul>
-            </li>
-            <li>These can be used anywhere in the format text and case does not matter.</li>
-          </ul>
-        </VCol>
+        <v-slide-y-transition origin="top left">
+          <VCol v-show="showHelp" class="help-panel">
+            <ul>
+              <li>To create file formats, use tokens from the following list:
+                <ul style="columns: 2">
+                  <li v-for="(value, key) in $store.getters.nowPlayingFormatted" :key="key">
+                    {{ config.labels.startTag }}{{ key }}{{ config.labels.endTag }}
+                  </li>
+                </ul>
+              </li>
+              <li>These can be used anywhere in the format text and case does not matter.</li>
+            </ul>
+          </VCol>
+        </v-slide-y-transition>
       </VRow>
     </VCol>
   </VRow>

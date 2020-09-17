@@ -33,11 +33,13 @@
               <VIcon dense small>mdi-help-circle-outline</VIcon>
             </VBtn>
           </VCol>
-          <VCol v-if="showHelp.local" class="help-panel">
-            <ul>
-              <li>File will open in your computer's default program for that file extension.</li>
-            </ul>
-          </VCol>
+          <v-slide-y-transition origin="top left">
+            <VCol v-show="showHelp.local" class="help-panel">
+              <ul>
+                <li>File will open in your computer's default program for that file extension.</li>
+              </ul>
+            </VCol>
+          </v-slide-y-transition>
         </VRow>
       </div>
       <div class="panel">
@@ -64,13 +66,15 @@
               <VIcon dense small>mdi-help-circle-outline</VIcon>
             </VBtn>
           </VCol>
-          <VCol v-if="showHelp.spotify" class="help-panel">
-            <ul>
-              <li>Feel free to change the playlist name and description in Spotify. It will still work!</li>
-              <li>If you accidentally delete your playlist, click one of the Open buttons above and it will automatically be restored.</li>
-              <li>If you want to completely start over, delete the playlist in Spotify and click the Create New Playlist button to lose all knowledge of previous playlist.</li>
-            </ul>
-          </VCol>
+          <v-slide-y-transition origin="top left">
+            <VCol v-show="showHelp.spotify" class="help-panel">
+              <ul>
+                <li>Feel free to change the playlist name and description in Spotify. It will still work!</li>
+                <li>If you accidentally delete your playlist, click one of the Open buttons above and it will automatically be restored.</li>
+                <li>If you want to completely start over, delete the playlist in Spotify and click the Create New Playlist button to lose all knowledge of previous playlist.</li>
+              </ul>
+            </VCol>
+          </v-slide-y-transition>
         </VRow>
       </div>
     </VCol>
