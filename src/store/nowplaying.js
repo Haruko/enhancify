@@ -50,6 +50,22 @@ export default {
   },
 
   actions: {
+    async startStop({ state, rootState, dispatch }) {
+      if (typeof state.updateTimeoutID !== 'undefined') {
+        // Stop
+        ipcRenderer.send('unregister-hotkey');
+        await dispatch('stopNowPlayingTimeouts');
+        ipcRenderer.send('tray-stop');
+      } else {
+        // Start
+        ipcRenderer.send('tray-start');
+        await dispatch('getNowPlayingData');
+        await dispatch('writeOutputFiles');
+        await dispatch('startNowPlayingTimeouts');
+        ipcRenderer.send('register-hotkey', rootState.config.hotkey);
+      }
+    },
+
     // Get data from API
     async getNowPlayingData({ rootState, rootGetters, commit, dispatch }) {
       let responseData;

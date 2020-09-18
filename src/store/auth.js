@@ -102,7 +102,7 @@ export default {
         await dispatch('storeRefreshToken');
         await dispatch('getUserId');
 
-        // return true;
+        ipcRenderer.send('tray-login');
         return true;
       } else {
         // No success
@@ -113,6 +113,7 @@ export default {
         commit('SET_AUTH_PROP', { prop: 'refresh_token', value: undefined });
         commit('SET_AUTH_PROP', { prop: 'user_id', value: undefined });
 
+        ipcRenderer.send('tray-logout');
         return false;
       }
     },
@@ -189,6 +190,7 @@ export default {
       await dispatch('deAuthNowPlaying');
 
       await ipcRenderer.invoke('delete-file', 'token');
+      ipcRenderer.send('tray-logout');
       router.push('/');
     },
   },

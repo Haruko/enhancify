@@ -31,6 +31,16 @@ export default {
     };
   },
 
+  mounted() {
+    ipcRenderer.removeAllListeners('tray-logout');
+    ipcRenderer.removeAllListeners('tray-start');
+    ipcRenderer.removeAllListeners('tray-stop');
+    ipcRenderer.removeAllListeners('tray-bookmark');
+    
+    ipcRenderer.off('tray-login', this.authorize);
+    ipcRenderer.on('tray-login', this.authorize);
+  },
+
   methods: {
     async authorize() {
       await this.$store.dispatch('saveToLocalStorage');

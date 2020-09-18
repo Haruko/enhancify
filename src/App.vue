@@ -28,7 +28,7 @@ export default {
   mounted() {
     ipcRenderer.off('window-resize', this.resizeWindow);
     ipcRenderer.on('window-resize', this.resizeWindow);
-    
+
     ipcRenderer.off('disable-desktop', this.disableSpotifyDesktop);
     ipcRenderer.on('disable-desktop', this.disableSpotifyDesktop);
   },

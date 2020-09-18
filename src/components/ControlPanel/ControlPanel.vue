@@ -14,8 +14,6 @@
   </VRow>
 </template>
 <script>
-import { ipcRenderer } from 'electron';
-
 export default {
   name: 'ControlPanel',
 
@@ -35,15 +33,7 @@ export default {
 
   methods: {
     async startStop() {
-      if (this.running) {
-        ipcRenderer.send('unregister-hotkey');
-        await this.$store.dispatch('stopNowPlayingTimeouts');
-      } else {
-        await this.$store.dispatch('getNowPlayingData');
-        await this.$store.dispatch('writeOutputFiles');
-        await this.$store.dispatch('startNowPlayingTimeouts');
-        ipcRenderer.send('register-hotkey', this.$store.state.config.hotkey);
-      }
+      await this.$store.dispatch('startStop');
     },
 
     async bookmark() {

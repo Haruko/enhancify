@@ -1,10 +1,11 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, globalShortcut } from 'electron';
+import { app, protocol, BrowserWindow, globalShortcut, Tray, Menu, ipcMain } from 'electron';
 import { initIPC } from './ipc.js';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 const commandExists = require('command-exists');
+const path = require('path');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -15,7 +16,11 @@ if (!hasLock) {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win
+let win;
+let tray,
+  trayMenu,
+  isLoggedIn = false,
+  isStarted = false;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -25,6 +30,7 @@ protocol.registerSchemesAsPrivileged([
 function createWindow() {
   const width = 800;
   const height = 600;
+
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
@@ -44,6 +50,7 @@ function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+
     if (!process.env.IS_TEST) {
       win.webContents.openDevTools();
     }
@@ -58,6 +65,7 @@ function createWindow() {
 
     win.once('show', async () => {
       win.webContents.send('window-resize', width, height);
+
       if (!desktopExists) {
         win.webContents.send('disable-desktop');
       }
@@ -77,6 +85,7 @@ function createWindow() {
 
   win.on('will-quit', (event) => globalShortcut.unregisterAll());
 
+  initTray();
   initIPC(win);
 }
 
@@ -92,6 +101,118 @@ function onWindowResize(context, width, height) {
   win.webContents.send('window-resize', width, height, win.isMaximized());
 }
 
+function initTray() {
+  createTray();
+  createTrayMenu(true);
+
+  // Window state
+  win.on('minimize', (event) => {
+    event.preventDefault();
+    win.hide();
+    createTrayMenu();
+  });
+
+  // Tray IPC
+  ipcMain.on('tray-login', () => {
+    isLoggedIn = true;
+    isStarted = false;
+    createTrayMenu();
+  });
+
+  ipcMain.on('tray-logout', () => {
+    isLoggedIn = false;
+    isStarted = false;
+    createTrayMenu();
+  });
+
+  ipcMain.on('tray-start', () => {
+    isStarted = true;
+    createTrayMenu();
+  });
+
+  ipcMain.on('tray-stop', () => {
+    isStarted = false;
+    createTrayMenu();
+  });
+}
+
+function createTray() {
+  tray = new Tray('build/icon.ico');
+  tray.setToolTip('Enhancify');
+  tray.on('double-click', () => {
+    if (win.isVisible()) {
+      win.focus();
+    } else {
+      win.show();
+      createTrayMenu();
+    }
+  });
+}
+
+function createTrayMenu(newlyCreated) {
+  // Start stop
+  // Bookmark
+  const menuItems = [];
+
+  // Add logout option
+  if (isLoggedIn) {
+    menuItems.push({
+      label: 'Log Out',
+      click: () => win.webContents.send('tray-logout'),
+    });
+
+    // Add start/stop/bookmark options
+    if (isStarted) {
+      menuItems.push({
+        label: 'Bookmark',
+        click: () => win.webContents.send('tray-bookmark'),
+      }, {
+        label: 'Stop',
+        click: () => win.webContents.send('tray-stop'),
+      });
+    } else {
+      menuItems.push({
+        label: 'Start',
+        click: () => win.webContents.send('tray-start'),
+      });
+    }
+  } else {
+    menuItems.push({
+      label: 'Log In',
+      click: () => {
+        win.webContents.send('tray-login');
+        win.show();
+        createTrayMenu();
+      },
+    });
+  }
+
+  menuItems.push({
+    type: 'separator',
+  }, {
+    label: (newlyCreated || win.isVisible()) ? 'Hide' : 'Show',
+    id: 'show-hide',
+    click: toggleMinimizeToTray,
+  }, {
+    label: 'Quit',
+    role: 'quit',
+  });
+
+  trayMenu = Menu.buildFromTemplate(menuItems);
+
+  tray.setContextMenu(trayMenu);
+}
+
+function toggleMinimizeToTray() {
+  if (win.isVisible()) {
+    win.hide();
+  } else {
+    win.show();
+  }
+
+  createTrayMenu();
+}
+
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
@@ -99,7 +220,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
+});
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
@@ -108,7 +229,7 @@ app.on('activate', () => {
 
     createWindow();
   }
-})
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

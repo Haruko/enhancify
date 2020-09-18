@@ -10,6 +10,11 @@ module.exports = {
       nodeModulesPath: ['./node_modules'],
       nodeIntegration: true,
       mainProcessWatch: ['src/ipc.js', 'src/config.json5', 'src/server'],
+      builderOptions: {
+        win: {
+          icon: 'build/icon.ico',
+        },
+      },
     },
   },
 
