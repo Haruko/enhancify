@@ -16,7 +16,11 @@ if (!hasLock) {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
+const iconPath = isDevelopment ? 'public/icon-256x256.png' :
+  path.join(__dirname, 'icon-256x256.png');
+
 let win;
+
 let tray,
   trayMenu,
   isLoggedIn = false,
@@ -33,6 +37,7 @@ function createWindow() {
 
   // Create the browser window.
   win = new BrowserWindow({
+    icon: iconPath,
     width: 800,
     height: 600,
     frame: false,
@@ -137,7 +142,7 @@ function initTray() {
 }
 
 function createTray() {
-  tray = new Tray('build/icon.ico');
+  tray = new Tray(iconPath);
   tray.setToolTip('Enhancify');
   tray.on('double-click', () => {
     if (win.isVisible()) {
