@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="-8 -8 16 16" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <radialGradient gradientUnits="userSpaceOnUse" cx="0" cy="0" r="8.9" id="gradient-1">
+      <stop offset="0" style="stop-color: rgba(30, 215, 96, 1);"/>
+      <stop offset="0.85" style="stop-color: rgb(30, 215, 96);"/>
+      <stop offset="1" style="stop-color: rgba(30, 215, 96, 0);"/>
+    </radialGradient>
+    <filter id="drop-shadow-filter-0" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="drop-shadow 1 10 10 0 0.5 rgba(0,0,0,0.3)">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.4"/>
+      <feComponentTransfer result="offsetblur">
+        <feFuncA id="spread-ctrl" type="linear" slope="1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="rgba(0,0,0,1)"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+      </feMerge>
+    </filter>
+  </defs>
+  <circle style="fill: rgb(30, 215, 96); stroke: url(#gradient-1); stroke-width: 20px;" cx="0" cy="0" r="4"/>
+  <polygon style="fill: rgb(0, 0, 0); filter: url(#drop-shadow-filter-0);" points="-2 -4 2 -4 2 -2.75 -0.75 -2.75 -0.75 -0.562 2 -0.562 2 0.563 -0.75 0.563 -0.75 2.75 2 2.75 2 4 -2 4" transform="rotate(10)"/>
+</svg>
