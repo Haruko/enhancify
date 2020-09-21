@@ -29,6 +29,7 @@ export default {
 
     updateTimeoutID: undefined,
     secondsTimeoutID: undefined,
+    idleTimeoutID: undefined,
 
     desktopInstalled: true,
     bookmarkCooldown: 1000,
@@ -107,6 +108,8 @@ export default {
       let timeoutLength;
 
       if (typeof state.nowPlayingData !== 'undefined' && state.nowPlayingData.is_playing) {
+        commit('CLEAR_TIMEOUT', 'idleTimeoutID');
+
         const calculated = (state.nowPlayingData.item.duration_ms -
             rootState.config.crossfade * 1000) -
           state.nowPlayingData.progress_ms;
@@ -119,6 +122,11 @@ export default {
         await dispatch('startSecondsTimeout', { length: timeoutLength, progress: progress });
       } else {
         timeoutLength = config.api.maxRequestInterval;
+
+        if (typeof state.nowPlayingData === 'undefined' || rootState.config.idleOnPause) {
+          // If no data exists or we idle on pause then start idle timer
+          await dispatch('startIdleTimer');
+        }
       }
 
       const timeoutID = setTimeout(async () => {
@@ -149,6 +157,17 @@ export default {
     async stopNowPlayingTimeouts({ commit }) {
       commit('CLEAR_TIMEOUT', 'updateTimeoutID');
       commit('CLEAR_TIMEOUT', 'secondsTimeoutID');
+      commit('CLEAR_TIMEOUT', 'idleTimeoutID');
+    },
+
+    async startIdleTimer({ rootState, commit, dispatch }) {
+      const timeoutID = setTimeout(async () => {
+        ipcRenderer.send('unregister-hotkey');
+        await dispatch('stopNowPlayingTimeouts');
+        ipcRenderer.send('tray-stop');
+      }, rootState.config.idleTimerLength * 60 * 1000);
+
+      commit('SET_NOWPLAYING_PROP', { prop: 'idleTimeoutID', value: timeoutID });
     },
 
     // Set progressOnly to true to only process file formats that include <<progress>
