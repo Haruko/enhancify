@@ -9,11 +9,6 @@ const path = require('path');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-const hasLock = app.requestSingleInstanceLock();
-if (!hasLock) {
-  app.quit();
-}
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 const iconPath = isDevelopment ? 'public/icon.ico' :
@@ -29,10 +24,77 @@ let tray,
   isLoggedIn = false,
   isStarted = false;
 
-// Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { secure: true, standard: true } }
-])
+const hasLock = app.requestSingleInstanceLock();
+if (!hasLock) {
+  app.quit();
+} else {
+  // Scheme must be registered before the app is ready
+  protocol.registerSchemesAsPrivileged([
+    { scheme: 'app', privileges: { secure: true, standard: true } }
+  ])
+
+  // Quit when all windows are closed.
+  app.on('window-all-closed', () => {
+    // On macOS it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform !== 'darwin') {
+      app.quit()
+    }
+  });
+
+  app.on('activate', () => {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (win === null) {
+
+      createWindow();
+    }
+  });
+
+  // Focus this window if it's already running and a second instance tries to open
+  app.on('second-instance', () => {
+    if (!win.isVisible()) {
+      // If it's minimized to tray then show it and recreate tray menu
+      win.show();
+      createTrayMenu();
+    }
+    
+    win.focus();
+  });
+
+  // This method will be called when Electron has finished
+  // initialization and is ready to create browser windows.
+  // Some APIs can only be used after this event occurs.
+  app.on('ready', async () => {
+    if (isDevelopment && !process.env.IS_TEST) {
+      // Install Vue Devtools
+      try {
+        await installExtension(VUEJS_DEVTOOLS)
+      } catch (e) {
+        console.error('Vue Devtools failed to install:', e.toString())
+      }
+    }
+
+    createWindow();
+  });
+
+  // Exit cleanly on request from parent process in development mode.
+  if (isDevelopment) {
+    if (process.platform === 'win32') {
+      process.on('message', (data) => {
+        if (data === 'graceful-exit') {
+          app.quit();
+        }
+      })
+    } else {
+      process.on('SIGTERM', () => {
+        app.quit();
+      })
+    }
+  }
+}
+
+
 
 function createWindow() {
   const width = 800;
@@ -219,53 +281,4 @@ function toggleMinimizeToTray() {
   }
 
   createTrayMenu();
-}
-
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-});
-
-app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (win === null) {
-
-    createWindow();
-  }
-});
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS)
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString())
-    }
-  }
-
-  createWindow();
-})
-
-// Exit cleanly on request from parent process in development mode.
-if (isDevelopment) {
-  if (process.platform === 'win32') {
-    process.on('message', (data) => {
-      if (data === 'graceful-exit') {
-        app.quit();
-      }
-    })
-  } else {
-    process.on('SIGTERM', () => {
-      app.quit();
-    })
-  }
 }
