@@ -7,16 +7,16 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 const commandExists = require('command-exists');
 const path = require('path');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+import config from 'json5-loader!./config.json5';
+const environment = process.env.NODE_ENV;
+const isDevelopment = environment !== 'production';
+
+const systemRootPath = path.join(...(config.filesystem.system[environment].root || [__dirname]));
+const iconPath = path.join(systemRootPath, config.filesystem.system[environment].icon);
+const trayIconPath = path.join(systemRootPath, config.filesystem.system[environment].trayIcon);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-const iconPath = isDevelopment ? 'public/icon.ico' :
-  path.join(__dirname, 'icon.ico');
-
-const trayIconPath = isDevelopment ? 'public/logo256blur.png' :
-  path.join(__dirname, 'logo256blur.png');
-
 let win;
 
 let tray,
@@ -58,7 +58,7 @@ if (!hasLock) {
       win.show();
       createTrayMenu();
     }
-    
+
     win.focus();
   });
 

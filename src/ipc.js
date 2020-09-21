@@ -381,7 +381,7 @@ function handleInputEvent(event, input) {
 }
 
 function getFileBasePath(type) {
-  const filesystemConfig = config.filesystem[type];
+  const filesystemConfig = config.filesystem.runtime[type];
 
   if (typeof filesystemConfig !== 'undefined') {
     return path.join(app.getPath(filesystemConfig.pathBase), filesystemConfig.directory);
@@ -391,7 +391,7 @@ function getFileBasePath(type) {
 }
 
 function getFileName(type) {
-  const filesystemConfig = config.filesystem[type];
+  const filesystemConfig = config.filesystem.runtime[type];
 
   if (typeof filesystemConfig !== 'undefined') {
     const filename = filesystemConfig.filename

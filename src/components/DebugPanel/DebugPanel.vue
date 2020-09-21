@@ -22,7 +22,7 @@
                 <ol>
                   <li>Open the config directory</li>
                   <li>Close the application</li>
-                  <li>Delete the "{{config.filesystem.config.filename}}" and "{{config.filesystem.token.filename}}" files</li>
+                  <li>Delete the "{{config.filesystem.runtime.config.filename}}" and "{{config.filesystem.runtime.token.filename}}" files</li>
                   <li>Restart the application and re-authorize</li>
                 </ol>
               </li>

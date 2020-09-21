@@ -1,29 +1,43 @@
 {
   filesystem: {
-    config: {
-      pathBase: 'userData',
-      directory: 'config',
-      filename: 'config.json'
+    runtime: {
+      config: {
+        pathBase: 'userData',
+        directory: 'config',
+        filename: 'config.json'
+      },
+      token: {
+        pathBase: 'userData',
+        directory: 'config',
+        filename: 'refresh.token'
+      },
+      output: {
+        pathBase: 'documents',
+        directory: 'enhancify',
+        filename: null
+      },
+      album: {
+        pathBase: 'documents',
+        directory: 'enhancify',
+        filename: 'album.jpg'
+      },
+      bookmarks: {
+        pathBase: 'documents',
+        directory: 'enhancify',
+        filename: 'bookmarks.csv'
+      },
     },
-    token: {
-      pathBase: 'userData',
-      directory: 'config',
-      filename: 'refresh.token'
-    },
-    output: {
-      pathBase: 'documents',
-      directory: 'enhancify',
-      filename: null
-    },
-    album: {
-      pathBase: 'documents',
-      directory: 'enhancify',
-      filename: 'album.jpg'
-    },
-    bookmarks: {
-      pathBase: 'documents',
-      directory: 'enhancify',
-      filename: 'bookmarks.csv'
+    system: {
+      development: {
+        root: ['src', 'assets'],
+        icon: 'icon.ico',
+        trayIcon: 'logo256blur.png',
+      },
+      production: {
+        root: null,
+        icon: 'icon.ico',
+        trayIcon: 'logo256blur.png',
+      },
     },
   },
   api: {
