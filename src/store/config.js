@@ -5,6 +5,9 @@ import Vue from 'vue'
 
 export default {
   state: {
+    // Not editable by user
+    spotifyPlaylistId: undefined,
+    
     // Editable by user in frontend
     fileFormats: [{
       filename: 'trackinfo.txt',
@@ -14,19 +17,17 @@ export default {
       format: '<<progress>> / <<length>>',
     }],
 
-    // Editable by user in frontend
     crossfade: 0,
-
-    // Editable by user in frontend
+    idleTimerLength: 20, // minutes
+    idleOnPause: true,
+    
     hotkey: 'Shift+Insert',
 
-    // Editable by user in frontend
     saveBookmarksLocal: true,
     allowDupesLocal: false,
     
     saveBookmarksSpotify: false,
     allowDupesSpotify: false,
-    spotifyPlaylistId: undefined,
   },
 
   mutations: {

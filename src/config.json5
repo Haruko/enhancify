@@ -76,5 +76,7 @@
   other: {
     github: 'https://github.com/Haruko/enhancify',
     githubIssues: 'https://github.com/Haruko/enhancify/issues',
+    minIdleTimer: 5, // minutes
+    maxIdleTimer: 60, // minutes
   },
 }
