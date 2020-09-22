@@ -12,7 +12,7 @@ module.exports = {
       mainProcessWatch: ['src/ipc.js', 'src/config.json5', 'src/server'],
       builderOptions: {
         win: {
-          icon: 'build/icon.ico',
+          icon: 'src/assets/icon.ico',
         },
       },
     },
