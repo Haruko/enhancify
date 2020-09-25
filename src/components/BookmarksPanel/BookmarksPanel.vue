@@ -176,8 +176,8 @@ export default {
     ipcRenderer.on('hotkey-pressed', this.hotkeyPressed);
 
     // When registering new hotkey
-    ipcRenderer.off('register-hotkey-captured', this.hotkeyRegistered);
-    ipcRenderer.on('register-hotkey-captured', this.hotkeyRegistered);
+    ipcRenderer.off('new-hotkey-captured', this.hotkeyRegistered);
+    ipcRenderer.on('new-hotkey-captured', this.hotkeyRegistered);
   },
 
   methods: {
@@ -204,11 +204,11 @@ export default {
 
     startRecordingHotkeys() {
       this.recordingHotkey = true;
-      ipcRenderer.send('register-hotkey-start');
+      ipcRenderer.send('new-hotkey-start');
     },
 
     stopRecordingHotkeys() {
-      ipcRenderer.send('register-hotkey-stop');
+      ipcRenderer.send('new-hotkey-stop');
       this.recordingHotkey = false;
     },
 
@@ -223,6 +223,11 @@ export default {
 
       // Event is already unregistered in ipc.js
       this.recordingHotkey = false;
+      
+      if (typeof this.$store.state.nowplaying.updateTimeoutID !== 'undefined') {
+        // Need to unregister and re-register if running
+        ipcRenderer.send('register-hotkey', hotkeyString);
+      }
     },
   },
 }
