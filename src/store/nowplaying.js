@@ -51,11 +51,12 @@ export default {
   },
 
   actions: {
-    async startStop({ state, rootState, dispatch }) {
+    async startStop({ state, rootState, commit, dispatch }) {
       if (typeof state.updateTimeoutID !== 'undefined') {
         // Stop
         ipcRenderer.send('unregister-hotkey');
         await dispatch('stopNowPlayingTimeouts');
+        commit('CLEAR_TIMEOUT', 'idleTimeoutID');
         ipcRenderer.send('tray-stop');
       } else {
         // Start
@@ -123,7 +124,9 @@ export default {
       } else {
         timeoutLength = config.api.maxRequestInterval;
 
-        if (typeof state.nowPlayingData === 'undefined' || rootState.config.idleOnPause) {
+        if (typeof state.idleTimeoutID === 'undefined' && (
+            typeof state.nowPlayingData === 'undefined' ||
+            rootState.config.idleOnPause)) {
           // If no data exists or we idle on pause then start idle timer
           await dispatch('startIdleTimer');
         }
@@ -157,11 +160,11 @@ export default {
     async stopNowPlayingTimeouts({ commit }) {
       commit('CLEAR_TIMEOUT', 'updateTimeoutID');
       commit('CLEAR_TIMEOUT', 'secondsTimeoutID');
-      commit('CLEAR_TIMEOUT', 'idleTimeoutID');
     },
 
     async startIdleTimer({ rootState, commit, dispatch }) {
       const timeoutID = setTimeout(async () => {
+        commit('CLEAR_TIMEOUT', 'idleTimeoutID');
         ipcRenderer.send('unregister-hotkey');
         await dispatch('stopNowPlayingTimeouts');
         ipcRenderer.send('tray-stop');
