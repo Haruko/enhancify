@@ -1,39 +1,68 @@
 {
   filesystem: {
-    runtime: {
-      config: {
-        pathBase: 'userData',
-        directory: 'config',
-        filename: 'config.json'
+    development: {
+      runtime: {
+        config: {
+          pathBase: 'userData',
+          directory: 'config/dev',
+          filename: 'config.json'
+        },
+        token: {
+          pathBase: 'userData',
+          directory: 'config/dev',
+          filename: 'refresh.token'
+        },
+        output: {
+          pathBase: 'documents',
+          directory: 'enhancify/dev',
+          filename: null
+        },
+        album: {
+          pathBase: 'documents',
+          directory: 'enhancify/dev',
+          filename: 'album.jpg'
+        },
+        bookmarks: {
+          pathBase: 'documents',
+          directory: 'enhancify/dev',
+          filename: 'bookmarks.csv'
+        },
       },
-      token: {
-        pathBase: 'userData',
-        directory: 'config',
-        filename: 'refresh.token'
-      },
-      output: {
-        pathBase: 'documents',
-        directory: 'enhancify',
-        filename: null
-      },
-      album: {
-        pathBase: 'documents',
-        directory: 'enhancify',
-        filename: 'album.jpg'
-      },
-      bookmarks: {
-        pathBase: 'documents',
-        directory: 'enhancify',
-        filename: 'bookmarks.csv'
-      },
-    },
-    system: {
-      development: {
+      system: {
         root: ['src', 'assets'],
         icon: 'icon.ico',
         trayIcon: 'logo256blur.png',
       },
-      production: {
+    },
+    production: {
+      runtime: {
+        config: {
+          pathBase: 'userData',
+          directory: 'config',
+          filename: 'config.json'
+        },
+        token: {
+          pathBase: 'userData',
+          directory: 'config',
+          filename: 'refresh.token'
+        },
+        output: {
+          pathBase: 'documents',
+          directory: 'enhancify',
+          filename: null
+        },
+        album: {
+          pathBase: 'documents',
+          directory: 'enhancify',
+          filename: 'album.jpg'
+        },
+        bookmarks: {
+          pathBase: 'documents',
+          directory: 'enhancify',
+          filename: 'bookmarks.csv'
+        },
+      },
+      system: {
         root: null,
         icon: 'icon.ico',
         trayIcon: 'logo256blur.png',
@@ -57,7 +86,7 @@
     development: {
       basePort: 8080,
       // baseUrl: 'http://localhost:8080/#/',
-      
+
       authPort: 8081,
       authUrl: 'http://localhost:8081/callback',
       authSuccessUrl: 'http://localhost:8080/#/callback',
@@ -66,7 +95,7 @@
     production: {
       basePort: 80,
       // baseUrl: 'app://./index.html#/',
-      
+
       authPort: 8081,
       authUrl: 'http://localhost:8081/callback',
       authSuccessUrl: 'app://./index.html#/callback',

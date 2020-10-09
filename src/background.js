@@ -11,9 +11,9 @@ import config from 'json5-loader!./config.json5';
 const environment = process.env.NODE_ENV;
 const isDevelopment = environment !== 'production';
 
-const systemRootPath = path.join(...(config.filesystem.system[environment].root || [__dirname]));
-const iconPath = path.join(systemRootPath, config.filesystem.system[environment].icon);
-const trayIconPath = path.join(systemRootPath, config.filesystem.system[environment].trayIcon);
+const systemRootPath = path.join(...(config.filesystem[environment].system.root || [__dirname]));
+const iconPath = path.join(systemRootPath, config.filesystem[environment].system.icon);
+const trayIconPath = path.join(systemRootPath, config.filesystem[environment].system.trayIcon);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -24,7 +24,7 @@ let tray,
   isLoggedIn = false,
   isStarted = false;
 
-const hasLock = app.requestSingleInstanceLock();
+const hasLock = isDevelopment || app.requestSingleInstanceLock();
 if (!hasLock) {
   app.quit();
 } else {

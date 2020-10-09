@@ -127,7 +127,8 @@ const keycodeMappings = {
   Slash: '/',
 };
 
-const authServerConfig = config.server[process.env.NODE_ENV];
+const environment = process.env.NODE_ENV;
+const authServerConfig = config.server[environment];
 const authServer = new AuthServer(
   authServerConfig.authPort,
   authServerConfig.authSuccessUrl,
@@ -381,7 +382,7 @@ function handleInputEvent(event, input) {
 }
 
 function getFileBasePath(type) {
-  const filesystemConfig = config.filesystem.runtime[type];
+  const filesystemConfig = config.filesystem[environment].runtime[type];
 
   if (typeof filesystemConfig !== 'undefined') {
     return path.join(app.getPath(filesystemConfig.pathBase), filesystemConfig.directory);
@@ -391,7 +392,7 @@ function getFileBasePath(type) {
 }
 
 function getFileName(type) {
-  const filesystemConfig = config.filesystem.runtime[type];
+  const filesystemConfig = config.filesystem[environment].runtime[type];
 
   if (typeof filesystemConfig !== 'undefined') {
     const filename = filesystemConfig.filename
