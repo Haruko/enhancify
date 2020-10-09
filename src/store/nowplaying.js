@@ -37,11 +37,17 @@ export default {
     lastBookmarkedTime: undefined,
     lastBookmarkedUri: undefined,
     lastBookmarkedFlagState: undefined,
+
+    bookmarkCache: undefined,
   },
 
   mutations: {
     SET_NOWPLAYING_PROP(state, { prop, value }) {
       state[prop] = value;
+    },
+
+    PUSH_NOWPLAYING_ARRAY(state, { prop, value }) {
+      state[prop].push(value);
     },
 
     CLEAR_TIMEOUT(state, timeoutName) {
@@ -322,8 +328,8 @@ export default {
           // Check for duplicate
           // We can skip this if we had to create the playlist
           if (!created && !(bookmarkDupeFlagState & 0b10)) {
-            const track = await dispatch('findTrackInPlaylist', { playlistId: playlistId, trackId: state.nowPlayingData.item.id });
-            shouldWrite = !track;
+            const trackFound = await dispatch('findTrackInPlaylist', { playlistId: playlistId, trackId: state.nowPlayingData.item.id });
+            shouldWrite = !trackFound;
           }
 
           // Add song to playlist
@@ -333,6 +339,14 @@ export default {
             }, {
               headers: rootGetters.authHeader,
             });
+
+            if (rootState.config.cacheBookmarksSpotify) {
+              if (typeof state.bookmarkCache === 'undefined') {
+                commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkCache', value: [] });
+              }
+
+              commit('PUSH_NOWPLAYING_ARRAY', { prop: 'bookmarkCache', value: state.nowPlayingData.item.id });
+            }
 
             didBookmark |= 0b10;
           }
@@ -474,26 +488,36 @@ export default {
       });
     },
 
-    async findTrackInPlaylist({ rootGetters }, { playlistId, trackId }) {
-      const limit = 100; // Max limit possible
-      let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=0&limit=${limit}`;
-
-      let foundTrack;
-
-      do {
-        await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
-        const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
-
-        // Check if it exists
-        foundTrack = response.data.items.find(t => t.track.id === trackId);
-
-        nextUrl = response.data.next;
-      } while (nextUrl !== null && typeof foundTrack === 'undefined');
-
-      if (typeof foundTrack !== 'undefined') {
-        return foundTrack;
+    async findTrackInPlaylist({ state, rootState, rootGetters, commit }, { playlistId, trackId }) {
+      if (rootState.config.cacheBookmarksSpotify && typeof state.bookmarkCache !== 'undefined') {
+        // If we are caching bookmarks and we have a cache saved then use that
+        return !!state.bookmarkCache.find(id => id === trackId);
       } else {
-        return undefined;
+        const limit = 100; // Max limit possible
+        let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=0&limit=${limit}`;
+
+        let trackFound = false;
+        let trackList = [];
+
+        do {
+          await new Promise((resolve) => setTimeout(() => resolve(), config.api.maxBookmarkRequestInterval));
+          const response = await axios.get(nextUrl, { headers: rootGetters.authHeader, });
+
+          // Check if it exists
+          trackFound = trackFound || !!response.data.items.find(t => t.track.id === trackId);
+
+          if (rootState.config.cacheBookmarksSpotify) {
+            trackList = trackList.concat(response.data.items.map(t => t.track.id));
+          }
+
+          nextUrl = response.data.next;
+        } while (nextUrl !== null && (rootState.config.cacheBookmarksSpotify || typeof trackFound === 'undefined'));
+
+        if (rootState.config.cacheBookmarksSpotify) {
+          commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkCache', value: trackList });
+        }
+
+        return trackFound;
       }
     },
 

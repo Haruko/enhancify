@@ -67,6 +67,14 @@
             <VBtn class="width-2" color="primary" small @click.native="openPlaylist('browser')">Open in browser</VBtn>
           </VCol>
         </VRow>
+        <VRow no-gutters align="center">
+          <VCol class="offset-sm-1" cols="5">
+            <VSwitch v-model="cacheBookmarksSpotify" :disabled="!saveBookmarksSpotify || allowDupesSpotify" dense hide-details="true" label="Cache bookmark list"></VSwitch>
+          </VCol>
+          <VCol cols="6" class="text-right">
+            <VBtn class="width-2" color="primary" small @click.native="emptySpotifyBookmarkCache">Clear Cache</VBtn>
+          </VCol>
+        </VRow>
         <VRow no-gutters align="start" class="mt-2">
           <VCol class="flex-grow-0 flex-shrink-1">
             <VBtn class="square ml-2" color="info" small dense @click.native="showHelp.spotify = !showHelp.spotify">
@@ -79,6 +87,7 @@
                 <li>Feel free to change the playlist name and description in Spotify. It will still work!</li>
                 <li>If you accidentally delete your playlist, click one of the Open buttons above and it will automatically be restored.</li>
                 <li>If you want to completely start over, delete the playlist in Spotify and click the Create New Playlist button to lose all knowledge of previous playlist.</li>
+                <li>The bookmark cache is only maintained during the current session. This will cause the first bookmark of a session or after the cache is manually cleared to be slower than future bookmarks within the same session.</li>
               </ul>
             </VCol>
           </v-slide-y-transition>
@@ -149,6 +158,20 @@ export default {
       },
     },
 
+    cacheBookmarksSpotify: {
+      get() {
+        return this.$store.state.config.cacheBookmarksSpotify;
+      },
+
+      async set(value) {
+        await this.$store.dispatch('changeConfigProp', { prop: 'cacheBookmarksSpotify', value });
+
+        if (!value) {
+          this.emptySpotifyBookmarkCache();
+        }
+      },
+    },
+
     hotkey: {
       get() {
         return this.$store.state.config.hotkey;
@@ -198,6 +221,10 @@ export default {
       await this.$store.dispatch('changeConfigProp', { prop: 'spotifyPlaylistId', value: playlistId });
     },
 
+    emptySpotifyBookmarkCache() {
+      this.$store.commit('SET_NOWPLAYING_PROP', { prop: 'bookmarkCache', value: undefined });
+    },
+
     async openPlaylist(preference) {
       await this.$store.dispatch('openBookmarksPlaylist', preference);
     },
@@ -223,7 +250,7 @@ export default {
 
       // Event is already unregistered in ipc.js
       this.recordingHotkey = false;
-      
+
       if (typeof this.$store.state.nowplaying.updateTimeoutID !== 'undefined') {
         // Need to unregister and re-register if running
         ipcRenderer.send('register-hotkey', hotkeyString);

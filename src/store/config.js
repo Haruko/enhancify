@@ -28,6 +28,7 @@ export default {
     
     saveBookmarksSpotify: false,
     allowDupesSpotify: false,
+    cacheBookmarksSpotify: true,
   },
 
   mutations: {
